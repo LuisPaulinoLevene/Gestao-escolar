@@ -84,7 +84,7 @@ async def monitorar_encontros():
                         numeros_alerta = diretores + adjuntos
 
                         mensagem_alerta = (
-                            f"Saudacoes, ha um encontro referente a {encontro.titulo} agendado para {encontro.data_hora.strftime('%d/%m/%Y pelas %H:%M')}. Se pretende adiar ou cancelar, contacte o DAP Luis Maquina."
+                            f"Saudacoes, ha um encontro referente a {encontro.titulo} agendado para {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h. Se pretende adiar ou cancelar, contacte o DAP Luis Maquina."
                         )
 
                         await enviar_sms_api(mensagem_alerta, numeros_alerta)
@@ -106,17 +106,17 @@ async def monitorar_encontros():
                     if encontro.tipo == "PROFESSORES":
                         numeros_convocatoria = await pegar_numeros("professores")
                         mensagem_convocatoria = (
-                            f"Saudacoes prezados colegas, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os professores da escola para participar numa reuniao referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y pelas %H:%M')}h, na sala numero 5 desta institucao. A participacao e obrigatoria. DAP: Luis Maquina"
+                            f"Saudacoes prezados colegas, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os professores da escola para participar numa reuniao referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, na sala numero 5 desta institucao. A participacao e obrigatoria. DAP: Luis Maquina"
                         )
                     elif encontro.tipo == "FUNCIONARIOS":
                         numeros_convocatoria = await pegar_numeros("funcionarios")
                         mensagem_convocatoria = (
-                            f"Saudacoes, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os funcionarios da escola para participar numa reuniao referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y pelas %H:%M')}h, na sala numero 5 desta institucao. A participacao e obrigatoria. DE: Belinha Alfredo"
+                            f"Saudacoes, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os funcionarios da escola para participar numa reuniao referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, na sala numero 5 desta institucao. A participacao e obrigatoria. DE: Belinha Alfredo"
                         )
                     elif encontro.tipo == "TODOS":
                         numeros_convocatoria = await pegar_numeros("direcao")
                         mensagem_convocatoria = (
-                            f"Saudacoes prezados colegas, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os professores da escola para participar numa reuniao referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y pelas %H:%M')}h, na sala numero 5 desta institucao. A participacao e obrigatoria. DAP: Luis Maquina"
+                            f"Saudacoes prezados colegas, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os professores da escola para participar numa reuniao referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, na sala numero 5 desta institucao. A participacao e obrigatoria. DAP: Luis Maquina"
                         )
                     else:
                         continue  # ignora tipo desconhecido
