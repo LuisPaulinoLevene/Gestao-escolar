@@ -105,7 +105,7 @@ async function listarEncontros() {
             <td>${e.convocatoria_enviada}</td>
             <td>${formatarData(e.criado_em)}</td>
             <td class="actions">
-                <button class="edit" onclick="editar(${e.id})">Ediar</button>
+                <button class="edit" onclick="editar(${e.id})">Adiar</button>
                 <button class="delete" onclick="deletar(${e.id})">Cancelar</button>
             </td>
         `;
@@ -174,7 +174,7 @@ async function editar(id) {
 
 // Deletar
 async function deletar(id) {
-    if (confirm("Tem certeza que deseja apagar este encontro?")) {
+    if (confirm("Tem certeza que deseja cancelar este encontro?")) {
         await fetch(`${API_BASE}/encontros/${id}`, { method: "DELETE" });
         listarEncontros();
     }
