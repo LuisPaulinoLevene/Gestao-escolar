@@ -18,7 +18,7 @@ async def enviar_sms_api(mensagem, numeros):
     url = f"{base_url}/sms/enviar"
 
     payload = {
-        "sender_id": "MOZOTP",
+        "sender_id": "PHANDIRA-2",
         "mensagem": mensagem,
         "numeros": numeros
     }
