@@ -84,7 +84,7 @@ async def monitorar_encontros():
                         numeros_alerta = diretores + adjuntos
 
                         mensagem_alerta = (
-                            f"Saudacoes, ha um encontro referente a {encontro.titulo} agendado para {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h. Se pretende adiar ou cancelar, contacte o sr Luis Maquina. Enviado por sistema."
+                            f"Saudacoes, ha um encontro referente a {encontro.titulo}, agendado para {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h. Se pretende adiar ou cancelar, contacte o sr Luis Maquina. Enviado por sistema."
                         )
 
                         await enviar_sms_api(mensagem_alerta, numeros_alerta)
