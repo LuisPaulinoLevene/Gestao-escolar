@@ -78,10 +78,9 @@ async def monitorar_encontros():
                 momento_alerta = encontro.data_hora - timedelta(days=2)
                 if encontro.alerta_enviado == "NAO" and agora >= momento_alerta:
                     # Numeros de alerta
-                    if encontro.tipo in ["PROFESSORES", "FUNCIONARIOS", "TODOS"]:
-                        diretores = await pegar_numeros("diretor")
-                        adjuntos = await pegar_numeros("adjunto")
-                        numeros_alerta = diretores + adjuntos
+                    if encontro.tipo in ["PROFESSORES", "FUNCIONARIOS"]:
+                        # Apenas pegar os números da coluna 'contactos_direcao'
+                        numeros_alerta = await pegar_numeros("direcao")
 
                         mensagem_alerta = (
                             f"Saudacoes, ha um encontro referente a {encontro.titulo}, agendado para {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h. Se pretende adiar ou cancelar, contacte o sr Luis Maquina. Enviado por sistema."
@@ -112,11 +111,6 @@ async def monitorar_encontros():
                         numeros_convocatoria = await pegar_numeros("funcionarios")
                         mensagem_convocatoria = (
                             f"Saudacoes, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os funcionarios desta instituicao, para participar numa reuniao, referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, na sala numero 5 da institucao anteriormente referida. Pede-se a pontualidade. DE: Belinha Alfredo"
-                        )
-                    elif encontro.tipo == "TODOS":
-                        numeros_convocatoria = await pegar_numeros("direcao")
-                        mensagem_convocatoria = (
-                            f"Saudacoes prezados colegas, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os professores desta instituicao, para participar numa reuniao, referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, na sala numero 5 da institucao anteriormente referida. Pede-se a pontualidade. DAP: Luis Maquina"
                         )
                     else:
                         continue  # ignora tipo desconhecido
