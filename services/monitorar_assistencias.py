@@ -20,7 +20,7 @@ async def enviar_sms_api(mensagem, numeros):
     payload = {
         "sender_id": "PHANDIRA-2",
         "mensagem": mensagem,
-        "numeros": numeros
+        "numeros": numeros  # Aqui garantimos que é uma lista de números
     }
 
     async with httpx.AsyncClient() as client:
@@ -75,19 +75,24 @@ async def monitorar_assistencias():
                 professor_assistente = result_assistente.scalars().first()
 
                 # ==========================
-                # Enviar SMS separadas, mantendo a formatação desejada
+                # Enviar SMS para o professor assistido
                 # ==========================
                 if professor_assistido:
                     mensagem_assistido = (
                         f"Saudacoes, amanha dia {a.data_hora.strftime('%d/%m/%Y')} tera uma assistencia de aula da disciplina de {a.disciplina} pelas {a.data_hora.strftime('%H:%M')}h, pelo professor {a.professor_assistente_nome}. Bom trabalho."
                     )
-                    await enviar_sms_api(mensagem_assistido, [professor_assistido.telefone])
+                    await enviar_sms_api(mensagem_assistido, [professor_assistido.telefone])  # Envia para um número de cada vez
+                    await asyncio.sleep(30)  # Pausa de 30 segundos entre os envios
 
+                # ==========================
+                # Enviar SMS para o professor assistente
+                # ==========================
                 if professor_assistente:
                     mensagem_assistente = (
                         f"Saudacoes, amanha dia {a.data_hora.strftime('%d/%m/%Y')} pela {a.data_hora.strftime('%H:%M')}h, devera efectuar uma assistencia de aula de {a.disciplina}, na {a.classe} classe, turma {a.turma}, ao professor {a.professor_assistido_nome}, na sala numero {a.numero_sala}, localizada na {a.localizacao_sala}."
                     )
-                    await enviar_sms_api(mensagem_assistente, [professor_assistente.telefone])
+                    await enviar_sms_api(mensagem_assistente, [professor_assistente.telefone])  # Envia para um número de cada vez
+                    await asyncio.sleep(30)  # Pausa de 30 segundos entre os envios
 
                 # ==========================
                 # Atualiza o status para NAO para não enviar novamente
