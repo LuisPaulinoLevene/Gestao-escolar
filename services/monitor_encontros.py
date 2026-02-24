@@ -13,7 +13,7 @@ INTERVALO_VERIFICACAO = 30
 # ==========================
 # Envio de SMS usando seu endpoint
 # ==========================
-async def enviar_sms_api(mensagem, numeros):
+async def enviar_sms_api(mensagem, numero):
     """
     Envia SMS usando seu endpoint /sms/enviar
     Funciona localmente e na nuvem (Render)
@@ -24,19 +24,25 @@ async def enviar_sms_api(mensagem, numeros):
 
     url = f"{base_url}/sms/enviar"
 
+    # Aqui garantimos que 'numero' será sempre uma lista (mesmo com um único número)
     payload = {
         "sender_id": "PHANDIRA-2",
         "mensagem": mensagem,
-        "numeros": numeros
+        "numeros": [numero]  # Enviar o número dentro de uma lista
     }
 
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.post(url, json=payload)
             if resp.status_code != 200:
-                print(f"⚠️ Erro ao enviar SMS: {resp.text}")
+                print(f"⚠️ Erro ao enviar SMS para {numero}: {resp.text}")
+                return False  # Se falhar o envio, retorna False
+            else:
+                print(f"✅ SMS enviado para {numero}")
+                return True  # Se o envio for bem-sucedido, retorna True
         except Exception as e:
-            print(f"⚠️ Exception ao enviar SMS: {e}")
+            print(f"⚠️ Exception ao enviar SMS para {numero}: {e}")
+            return False  # Se houver erro na requisição, retorna False
 
 # ==========================
 # Pegar números da tabela de contactos
@@ -119,15 +125,27 @@ async def monitorar_encontros():
                     else:
                         continue  # ignora tipo desconhecido
 
-                    await enviar_sms_api(mensagem_convocatoria, numeros_convocatoria)
+                    # Pegar todos os números de convocatória
+                    total_contatos = len(numeros_convocatoria)
+                    enviados = 0
 
-                    await db.execute(
-                        update(Encontro)
-                        .where(Encontro.id == encontro.id)
-                        .values(convocatoria_enviada="SIM")
-                    )
-                    await db.commit()
-                    print(f"📢 Convocatória enviada para encontro {encontro.id}")
+                    # Enviar um número de cada vez
+                    for numero in numeros_convocatoria:
+                        sucesso = await enviar_sms_api(mensagem_convocatoria, numero)
+                        if sucesso:
+                            enviados += 1  # Incrementar o contador de enviados
+                        # Esperar 30 segundos entre os envios
+                        await asyncio.sleep(30)
+
+                    # Só mudar o status para SIM se todos os contatos foram enviados
+                    if enviados == total_contatos:
+                        await db.execute(
+                            update(Encontro)
+                            .where(Encontro.id == encontro.id)
+                            .values(convocatoria_enviada="SIM")
+                        )
+                        await db.commit()
+                        print(f"📢 Convocatória enviada para encontro {encontro.id}")
 
         # Espera próximo loop
         await asyncio.sleep(INTERVALO_VERIFICACAO)
