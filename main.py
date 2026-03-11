@@ -13,7 +13,7 @@ from routers import (
     director, chefe_secretaria, funcionario_secretaria, usuario_professor,
     dashboard, importar_alunos, sms, encontro, contactos, assistencias
 )
-from routers.pages import ep_phandira_2, dados_aluno, encontros, contacto, informacoes, assistencia
+from routers.pages import ep_phandira_2, dados_aluno, encontros, contacto, informacoes, assistencia, ass_direccao
 
 # 🔥 IMPORTA OS MONITORES AUTOMÁTICOS
 from services.monitor_encontros import monitorar_encontros
@@ -89,3 +89,4 @@ app.include_router(contacto.router)
 app.include_router(informacoes.router)
 app.include_router(assistencias.router)
 app.include_router(assistencia.router)
+app.include_router(ass_direccao.router)

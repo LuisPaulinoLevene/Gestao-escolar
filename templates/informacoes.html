@@ -102,7 +102,7 @@ button:disabled {
 
 <script>
 
-// 🔥 URL dinâmica (local e Render)
+// URL dinâmica (local e Render)
 const API_BASE = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
     ? "http://127.0.0.1:8000"
     : window.location.origin;
@@ -121,7 +121,7 @@ document.getElementById("formMensagem").addEventListener("submit", async functio
 
     btn.disabled = true;
     statusMsg.style.color = "black";
-    statusMsg.innerText = "A enviar SMS...";
+    statusMsg.innerText = "A preparar envio...";
 
     const tipos = getTiposSelecionados();
     const mensagem = document.getElementById("mensagem").value.trim();
@@ -157,27 +157,50 @@ document.getElementById("formMensagem").addEventListener("submit", async functio
             throw new Error("Nenhum número válido encontrado.");
         }
 
-        const payload = {
-            sender_id: "PHANDIRA-2",
-            mensagem: mensagem,
-            numeros: numeros
-        };
+        let enviados = [];
+        let falhados = [];
 
-        const res = await fetch(`${API_BASE}/sms/enviar`, {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(payload)
-        });
+        statusMsg.innerText = `A enviar para ${numeros.length} números...`;
 
-        if (!res.ok) {
-            const erro = await res.json();
-            throw new Error(erro.detail || "Erro ao enviar SMS");
+        // 🔥 ENVIO SEQUENCIAL (1 POR VEZ)
+        for (let i = 0; i < numeros.length; i++) {
+
+            const numero = numeros[i];
+
+            statusMsg.innerText =
+                `A enviar (${i + 1}/${numeros.length})...`;
+
+            const payload = {
+                sender_id: "PHANDIRA-2",
+                mensagem: mensagem,
+                numeros: [numero]
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/sms/enviar`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    falhados.push(numero);
+                } else {
+                    enviados.push(numero);
+                }
+
+            } catch (err) {
+                falhados.push(numero);
+            }
+
+            // Pequena pausa para evitar sobrecarga
+            await new Promise(resolve => setTimeout(resolve, 300));
         }
 
-        // 🔥 Apenas mensagem limpa
-        statusMsg.style.color = "green";
+        // Resultado final
+        statusMsg.style.color = falhados.length > 0 ? "orange" : "green";
         statusMsg.innerText =
-            "Mensagem enviada com sucesso para os números: " + numeros.join(", ");
+            `Envio concluído ✅\nEnviados: ${enviados.length} | Falhados: ${falhados.length}`;
 
         document.getElementById("formMensagem").reset();
 
