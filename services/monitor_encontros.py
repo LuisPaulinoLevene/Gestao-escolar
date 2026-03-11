@@ -10,59 +10,80 @@ import os
 # Intervalo de verificação do loop (em segundos)
 INTERVALO_VERIFICACAO = 30
 
+
 # ==========================
-# Envio de SMS usando seu endpoint
+# 📩 Envio de SMS usando endpoint
 # ==========================
-async def enviar_sms_api(mensagem, numero):
+async def enviar_sms_api(mensagem, numeros):
     """
-    Envia SMS usando seu endpoint /sms/enviar
-    Funciona localmente e na nuvem (Render)
+    Envia SMS usando endpoint /sms/enviar
+    Aceita número único ou lista de números
     """
+
     base_url = os.getenv("RENDER_EXTERNAL_URL")
     if not base_url:
         base_url = "http://127.0.0.1:8000"
 
     url = f"{base_url}/sms/enviar"
 
-    # Aqui garantimos que 'numero' será sempre uma lista (mesmo com um único número)
+    # Garantir que numeros é sempre lista
+    if not isinstance(numeros, list):
+        numeros = [numeros]
+
     payload = {
         "sender_id": "PHANDIRA-2",
         "mensagem": mensagem,
-        "numeros": [numero]  # Enviar o número dentro de uma lista
+        "numeros": numeros
     }
 
-    async with httpx.AsyncClient() as client:
+    print("📡 URL:", url)
+    print("📤 Enviando para:", numeros)
+
+    async with httpx.AsyncClient(timeout=30.0) as client:
         try:
             resp = await client.post(url, json=payload)
-            if resp.status_code != 200:
-                print(f"⚠️ Erro ao enviar SMS para {numero}: {resp.text}")
-                return False  # Se falhar o envio, retorna False
+
+            print("📥 Status:", resp.status_code)
+            print("📥 Resposta:", resp.text)
+
+            if resp.status_code == 200:
+                print("✅ SMS enviado com sucesso")
+                return True
             else:
-                print(f"✅ SMS enviado para {numero}")
-                return True  # Se o envio for bem-sucedido, retorna True
+                print("❌ Erro no envio")
+                return False
+
         except Exception as e:
-            print(f"⚠️ Exception ao enviar SMS para {numero}: {e}")
-            return False  # Se houver erro na requisição, retorna False
+            print(f"⚠️ Exception ao enviar SMS: {e}")
+            return False
+
 
 # ==========================
-# Pegar números da tabela de contactos
+# 📞 Pegar números da tabela de contactos
 # ==========================
 async def pegar_numeros(tipo):
     """
     Retorna lista de números de telefone por tipo:
     diretor, adjunto, professores, funcionarios, direcao
     """
+
     if tipo not in tipo_tabela:
         return []
 
     Model = tipo_tabela[tipo]
+
     async with SessionLocal() as db:
         result = await db.execute(select(Model))
         contactos = result.scalars().all()
-        return [c.telefone for c in contactos]
+
+        numeros = [c.telefone for c in contactos if c.telefone]
+        print(f"📞 Números encontrados para {tipo}:", numeros)
+
+        return numeros
+
 
 # ==========================
-# Monitor automático
+# 🔄 Monitor automático
 # ==========================
 async def monitorar_encontros():
     print("🔄 Monitor automático de encontros iniciado")
@@ -79,73 +100,105 @@ async def monitorar_encontros():
             for encontro in encontros:
 
                 # ==========================
-                # 🔔 ALERTA DIREÇÃO (2 dias antes)
+                # 🔔 ALERTA (2 dias antes)
                 # ==========================
                 momento_alerta = encontro.data_hora - timedelta(days=2)
+
                 if encontro.alerta_enviado == "NAO" and agora >= momento_alerta:
-                    # Numeros de alerta
+
                     if encontro.tipo == "PROFESSORES":
-                        diretores = await pegar_numeros("diretor")  # Para professores, pegamos os diretores
-                        numeros_alerta = diretores
+                        numeros_alerta = await pegar_numeros("diretor")
+
                     elif encontro.tipo == "FUNCIONARIOS":
-                        numeros_alerta = await pegar_numeros("direcao")  # Para funcionários, pegamos a direção
+                        numeros_alerta = await pegar_numeros("direcao")
+
                     else:
-                        continue  # ignora tipo desconhecido
+                        continue
 
-                    mensagem_alerta = (
-                        f"Saudacoes, ha um encontro referente a {encontro.titulo}, agendado para {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h. Se pretende adiar ou cancelar, contacte o sr Luis Maquina. Enviado por sistema."
-                    )
+                    if numeros_alerta:
 
-                    await enviar_sms_api(mensagem_alerta, numeros_alerta)
+                        mensagem_alerta = (
+                            f"Saudacoes, ha um encontro referente a "
+                            f"{encontro.titulo}, agendado para "
+                            f"{encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h. "
+                            f"Se pretende adiar ou cancelar, contacte o sr Luis Maquina. "
+                            f"Enviado por sistema."
+                        )
 
-                    await db.execute(
-                        update(Encontro)
-                        .where(Encontro.id == encontro.id)
-                        .values(alerta_enviado="SIM")
-                    )
-                    await db.commit()
-                    print(f"✅ Alerta enviado para encontro {encontro.id}")
+                        sucesso = await enviar_sms_api(
+                            mensagem_alerta,
+                            numeros_alerta
+                        )
+
+                        if sucesso:
+                            await db.execute(
+                                update(Encontro)
+                                .where(Encontro.id == encontro.id)
+                                .values(alerta_enviado="SIM")
+                            )
+                            await db.commit()
+                            print(f"✅ Alerta marcado como SIM (Encontro {encontro.id})")
+                        else:
+                            print(f"❌ Falha no envio do alerta {encontro.id}")
 
                 # ==========================
                 # 📢 CONVOCATÓRIA (1 dia antes)
                 # ==========================
                 momento_convocatoria = encontro.data_hora - timedelta(days=1)
+
                 if encontro.convocatoria_enviada == "NAO" and agora >= momento_convocatoria:
-                    # Numeros para convocatória
+
                     if encontro.tipo == "PROFESSORES":
-                        numeros_convocatoria = await pegar_numeros("professores")  # Para professores, números da tabela de professores
+                        numeros_convocatoria = await pegar_numeros("professores")
+
                         mensagem_convocatoria = (
-                            f"Saudacoes prezados colegas, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os professores desta instituicao, para participar numa reuniao, referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, na sala numero 5 da institucao anteriormente referida. Pede-se a pontualidade. DAP: Luis Maquina"
+                            f"Saudacoes prezados colegas, a direccao da EP-Phandira-2 "
+                            f"convoca todos os professores para reuniao referente a "
+                            f"{encontro.titulo}, amanha dia "
+                            f"{encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, "
+                            f"na sala numero 5. Pede-se pontualidade. "
+                            f"DAP: Luis Maquina"
                         )
+
                     elif encontro.tipo == "FUNCIONARIOS":
-                        numeros_convocatoria = await pegar_numeros("funcionarios")  # Para funcionários, números da tabela de funcionários
+                        numeros_convocatoria = await pegar_numeros("funcionarios")
+
                         mensagem_convocatoria = (
-                            f"Saudacoes, a direccao da EP-Phandira-2, vem por meio desta, convocar todos os funcionarios desta instituicao, para participar numa reuniao, referente a {encontro.titulo}, a ter lugar amanha, dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, na sala numero 5 da institucao anteriormente referida. Pede-se a pontualidade. DE: Belinha Alfredo"
+                            f"Saudacoes, a direccao da EP-Phandira-2 convoca todos os "
+                            f"funcionarios para reuniao referente a {encontro.titulo}, "
+                            f"amanha dia "
+                            f"{encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, "
+                            f"na sala numero 5. Pede-se pontualidade. "
+                            f"DE: Belinha Alfredo"
                         )
+
                     else:
-                        continue  # ignora tipo desconhecido
+                        continue
 
-                    # Pegar todos os números de convocatória
-                    total_contatos = len(numeros_convocatoria)
                     enviados = 0
+                    total = len(numeros_convocatoria)
 
-                    # Enviar um número de cada vez
                     for numero in numeros_convocatoria:
-                        sucesso = await enviar_sms_api(mensagem_convocatoria, numero)
-                        if sucesso:
-                            enviados += 1  # Incrementar o contador de enviados
-                        # Esperar 30 segundos entre os envios
-                        await asyncio.sleep(30)
+                        sucesso = await enviar_sms_api(
+                            mensagem_convocatoria,
+                            numero
+                        )
 
-                    # Só mudar o status para SIM se todos os contatos foram enviados
-                    if enviados == total_contatos:
+                        if sucesso:
+                            enviados += 1
+
+                        await asyncio.sleep(5)  # reduzir para 5s
+
+                    if total > 0 and enviados == total:
                         await db.execute(
                             update(Encontro)
                             .where(Encontro.id == encontro.id)
                             .values(convocatoria_enviada="SIM")
                         )
                         await db.commit()
-                        print(f"📢 Convocatória enviada para encontro {encontro.id}")
 
-        # Espera próximo loop
+                        print(f"📢 Convocatória marcada como SIM (Encontro {encontro.id})")
+                    else:
+                        print(f"❌ Nem todos SMS foram enviados ({enviados}/{total})")
+
         await asyncio.sleep(INTERVALO_VERIFICACAO)

@@ -26,10 +26,12 @@ async def enviar_sms_api(mensagem, numeros):
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.post(url, json=payload)
+            print(f"Resposta da API SMS: {resp.status_code}, {resp.text}")
             if resp.status_code != 200:
                 print(f"⚠️ Erro ao enviar SMS: {resp.text}")
         except Exception as e:
             print(f"⚠️ Exception ao enviar SMS: {e}")
+
 
 # ==========================
 # Monitor de assistências
@@ -39,35 +41,47 @@ async def monitorar_assistencias():
 
     while True:
         agora = datetime.now()
-        amanha = agora + timedelta(days=1)
-        dia_amanha = amanha.date()
+        print(f"Verificando assistências para o dia: {agora.date()}")
 
         async with SessionLocal() as db:
-            # Seleciona todas assistências programadas para amanhã
+            # Ajuste da consulta para considerar apenas a data sem a hora
+            dia_atual = agora.date()
+
+            # Seleciona todas assistências com status 'APROVADO' e data de assistência do dia ou no futuro
             result = await db.execute(
                 select(AssistenciaMutua)
                 .where(
-                    AssistenciaMutua.data_hora >= datetime.combine(dia_amanha, datetime.min.time()),
-                    AssistenciaMutua.data_hora <= datetime.combine(dia_amanha, datetime.max.time())
+                    AssistenciaMutua.status_aprovacao == "APROVADO",  # Filtra as assistências aprovadas
+                    AssistenciaMutua.data_hora >= datetime.combine(dia_atual, datetime.min.time())  # A data da assistência deve ser maior ou igual à data de hoje
                 )
             )
             assistencias = result.scalars().all()
 
+            # Depuração: exibe as datas de assistências
+            print(f"Assistências encontradas: {len(assistencias)}")
             for a in assistencias:
-                # ==========================
-                # Ignora se o status for NAO
-                # ==========================
-                if a.status_aprovacao == "NAO":
-                    continue  # passa para a próxima assistencia
+                print(f"Assistência ID {a.id}: {a.professor_assistido_nome} - {a.professor_assistente_nome}")
+                print(f"Data e Hora da Assistência: {a.data_hora}")
 
-                # Pegar contatos do professor assistido
+            if not assistencias:
+                print(f"⏸️ Nenhuma assistência aprovada encontrada para hoje ou no passado.")
+
+            for a in assistencias:
+                print(f"🔎 Processando Assistência ID {a.id}: {a.professor_assistido_nome} - {a.professor_assistente_nome}")
+
+                # Verificar se a data da assistência já passou
+                if a.data_hora <= agora:
+                    print(f"📅 A data da assistência ({a.data_hora}) já passou. Ignorando envio de SMS para esta assistência.")
+                    continue  # Não enviar SMS se a data já passou
+
+                # Pegar contatos do professor assistido com base no nome
                 result_assistido = await db.execute(
                     select(ContactoProfessor)
                     .where(ContactoProfessor.nome == a.professor_assistido_nome)
                 )
                 professor_assistido = result_assistido.scalars().first()
 
-                # Pegar contatos do professor assistente
+                # Pegar contatos do professor assistente com base no nome
                 result_assistente = await db.execute(
                     select(ContactoProfessor)
                     .where(ContactoProfessor.nome == a.professor_assistente_nome)
@@ -75,24 +89,34 @@ async def monitorar_assistencias():
                 professor_assistente = result_assistente.scalars().first()
 
                 # ==========================
-                # Enviar SMS para o professor assistido
+                # Verificar se o professor assistido foi encontrado
                 # ==========================
                 if professor_assistido:
+                    print(f"📲 Número do Professor Assistido: {professor_assistido.telefone}")
                     mensagem_assistido = (
                         f"Saudacoes, amanha dia {a.data_hora.strftime('%d/%m/%Y')} tera uma assistencia de aula da disciplina de {a.disciplina} pelas {a.data_hora.strftime('%H:%M')}h, pelo professor {a.professor_assistente_nome}. Bom trabalho."
                     )
-                    await enviar_sms_api(mensagem_assistido, [professor_assistido.telefone])  # Envia para um número de cada vez
+                    print(f"Enviando para: {professor_assistido.telefone}")
+                    await enviar_sms_api(mensagem_assistido,
+                                         [professor_assistido.telefone])  # Envia para um número de cada vez
                     await asyncio.sleep(30)  # Pausa de 30 segundos entre os envios
+                else:
+                    print(f"⚠️ Não foi encontrado o professor assistido: {a.professor_assistido_nome}")
 
                 # ==========================
-                # Enviar SMS para o professor assistente
+                # Verificar se o professor assistente foi encontrado
                 # ==========================
                 if professor_assistente:
+                    print(f"📲 Número do Professor Assistente: {professor_assistente.telefone}")
                     mensagem_assistente = (
                         f"Saudacoes, amanha dia {a.data_hora.strftime('%d/%m/%Y')} pela {a.data_hora.strftime('%H:%M')}h, devera efectuar uma assistencia de aula de {a.disciplina}, na {a.classe} classe, turma {a.turma}, ao professor {a.professor_assistido_nome}, na sala numero {a.numero_sala}, localizada na {a.localizacao_sala}."
                     )
-                    await enviar_sms_api(mensagem_assistente, [professor_assistente.telefone])  # Envia para um número de cada vez
+                    print(f"Enviando para: {professor_assistente.telefone}")
+                    await enviar_sms_api(mensagem_assistente,
+                                         [professor_assistente.telefone])  # Envia para um número de cada vez
                     await asyncio.sleep(30)  # Pausa de 30 segundos entre os envios
+                else:
+                    print(f"⚠️ Não foi encontrado o professor assistente: {a.professor_assistente_nome}")
 
                 # ==========================
                 # Atualiza o status para NAO para não enviar novamente
@@ -107,3 +131,12 @@ async def monitorar_assistencias():
 
         # Espera próximo loop
         await asyncio.sleep(INTERVALO_VERIFICACAO)
+
+
+# Inicia a verificação de assistências
+async def main():
+    await monitorar_assistencias()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
