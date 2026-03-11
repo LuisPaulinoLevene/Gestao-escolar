@@ -2,14 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import update
+from typing import List
 from database import get_db
 from models.assistencia import AssistenciaMutua
-from models.contactos_professores import ContactoProfessor
+from models.contactos_professores import ContactoProfessor  # Apenas essa tabela
 from schemas.assistencia import AssistenciaCreate, AssistenciaResponse
-from typing import List
 
 router = APIRouter(prefix="/assistencias", tags=["Assistências Mútuas"])
-
 
 # -----------------------------
 # Listar professores (dropdown)
@@ -20,15 +19,23 @@ async def listar_professores(db: AsyncSession = Depends(get_db)):
     professores = result.scalars().all()
     return [{"id": p.id, "nome": p.nome} for p in professores]
 
-
 # -----------------------------
 # Criar assistência
 # -----------------------------
 @router.post("/", response_model=AssistenciaResponse)
 async def criar_assistencia(dados: AssistenciaCreate, db: AsyncSession = Depends(get_db)):
-    # Pegando nomes dos professores a partir do ID
+    # Buscar o professor assistido na tabela ContactoProfessor
     assistido = await db.get(ContactoProfessor, dados.professor_assistido_id)
+    # Buscar o professor assistente na tabela ContactoProfessor
     assistente = await db.get(ContactoProfessor, dados.professor_assistente_id)
+
+    # Verificar se ambos os registros foram encontrados
+    if not assistido:
+        raise HTTPException(status_code=404, detail="Professor assistido não encontrado")
+    if not assistente:
+        raise HTTPException(status_code=404, detail="Professor assistente não encontrado")
+
+    # Criar nova assistência
     nova = AssistenciaMutua(
         professor_assistido_nome=assistido.nome,
         professor_assistente_nome=assistente.nome,
@@ -40,11 +47,13 @@ async def criar_assistencia(dados: AssistenciaCreate, db: AsyncSession = Depends
         trimestre=dados.trimestre,
         data_hora=dados.data_hora
     )
+
+    # Adicionar no banco de dados
     db.add(nova)
     await db.commit()
     await db.refresh(nova)
-    return nova
 
+    return nova
 
 # -----------------------------
 # Listar assistências
@@ -54,7 +63,6 @@ async def listar_assistencias(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(AssistenciaMutua))
     assistencias = result.scalars().all()
     return assistencias
-
 
 # -----------------------------
 # Aprovar/Desaprovar trimestre
@@ -73,7 +81,6 @@ async def alterar_status_trimestre(
     await db.commit()
     return {"message": f"Trimestre {trimestre} atualizado para {status}"}
 
-
 # -----------------------------
 # Obter assistência por ID
 # -----------------------------
@@ -83,7 +90,6 @@ async def obter_assistencia(id: int, db: AsyncSession = Depends(get_db)):
     if not assistencia:
         raise HTTPException(status_code=404, detail="Assistência não encontrada")
     return assistencia
-
 
 # -----------------------------
 # Atualizar assistência por ID
@@ -97,6 +103,13 @@ async def atualizar_assistencia(id: int, dados: AssistenciaCreate, db: AsyncSess
     assistido = await db.get(ContactoProfessor, dados.professor_assistido_id)
     assistente = await db.get(ContactoProfessor, dados.professor_assistente_id)
 
+    # Verificar se ambos os registros foram encontrados
+    if not assistido:
+        raise HTTPException(status_code=404, detail="Professor assistido não encontrado")
+    if not assistente:
+        raise HTTPException(status_code=404, detail="Professor assistente não encontrado")
+
+    # Atualizar dados da assistência
     assistencia.professor_assistido_nome = assistido.nome
     assistencia.professor_assistente_nome = assistente.nome
     assistencia.classe = dados.classe
@@ -110,7 +123,6 @@ async def atualizar_assistencia(id: int, dados: AssistenciaCreate, db: AsyncSess
     await db.commit()
     await db.refresh(assistencia)
     return assistencia
-
 
 # -----------------------------
 # Deletar assistência por ID
