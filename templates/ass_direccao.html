@@ -86,7 +86,7 @@ table th { background:#06b6d4; color:white; }
 </div>
 
 <script>
-const API = "http://127.0.0.1:8000";
+const API = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://127.0.0.1:8000" : "https://ep-phandira-2.onrender.com";
 
 // Carregar dropdown de professores assistidos
 async function carregarProfessores(){
