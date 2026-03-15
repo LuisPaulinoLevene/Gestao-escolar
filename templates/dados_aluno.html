@@ -5,13 +5,8 @@
 <title>SIGE — EP Phandira-2</title>
 
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+html,body{height:100%;}
 
 body{
 display:flex;
@@ -19,29 +14,17 @@ background:#f1f5f9;
 min-height:100vh;
 }
 
-/* SIDEBAR */
-
 .sidebar{
 width:260px;
 background:linear-gradient(180deg,#06b6d4,#22c55e);
 color:white;
 padding:25px;
-display:flex;
-flex-direction:column;
 min-height:100vh;
 }
 
-.logo{
-font-size:22px;
-font-weight:bold;
-margin-bottom:40px;
-}
+.logo{font-size:22px;font-weight:bold;margin-bottom:40px;}
 
-.menu{
-display:flex;
-flex-direction:column;
-gap:12px;
-}
+.menu{display:flex;flex-direction:column;gap:12px;}
 
 .menu a{
 text-decoration:none;
@@ -63,8 +46,6 @@ margin-left:10px;
 gap:8px;
 }
 
-/* MAIN */
-
 .main{
 flex:1;
 display:flex;
@@ -85,9 +66,8 @@ box-shadow:0 2px 8px rgba(0,0,0,0.05);
 .content{
 padding:25px;
 display:none;
+overflow-x:auto;
 }
-
-/* TABELA */
 
 table{
 width:100%;
@@ -120,14 +100,10 @@ background:#94a3b8;
 cursor:not-allowed;
 }
 
-/* CÉLULAS EDITÁVEIS */
-
 .editavel{
 background:#fff7cc;
 outline:2px solid #facc15;
 }
-
-/* MODAL */
 
 .modal{
 display:none;
@@ -154,15 +130,11 @@ padding:8px;
 margin-bottom:10px;
 }
 
-/* AGUARDE */
-
 .aguarde{
 font-weight:bold;
 color:#334155;
 margin-bottom:10px;
 }
-
-/* FOOTER */
 
 .footer{
 padding:12px 30px;
@@ -172,13 +144,10 @@ background:white;
 margin-top:auto;
 text-align:right;
 }
-
 </style>
 </head>
 
 <body>
-
-<!-- SIDEBAR -->
 
 <div class="sidebar">
 
@@ -189,43 +158,35 @@ text-align:right;
 <a onclick="toggleSubmenu()">Seleccione uma opcao ▾</a>
 
 <div id="submenuAlunos" class="submenu">
-
 <a onclick="abrirCadastro()">Cadastrar aluno</a>
-
 <a onclick="listarAlunos()">Ver dados dos alunos</a>
-
-<a onclick="buscarPorID()">Ver aluno por ID</a>
-
+<a onclick="mostrarBusca()">Ver aluno por ID</a>
 </div>
 
 </div>
-
 </div>
-
-<!-- MAIN -->
 
 <div class="main">
 
 <div class="topbar">
-
 <h3>Painel DAP</h3>
-
 <strong>👤 DAP</strong>
-
 </div>
 
 <div id="areaConteudo" class="content">
 
+<div id="areaBusca" style="display:none;margin-bottom:15px;">
+<input id="buscarID" placeholder="Digite o ID do aluno">
+<button onclick="buscarPorID()">Buscar</button>
+</div>
+
 <div id="msgAguarde" class="aguarde" style="display:none;">
-
 Aguarde...
-
 </div>
 
 <table id="tabelaAlunos">
 
 <thead>
-
 <tr>
 <th>ID</th>
 <th>Nome</th>
@@ -233,7 +194,6 @@ Aguarde...
 <th>Sexo</th>
 <th>Ação</th>
 </tr>
-
 </thead>
 
 <tbody></tbody>
@@ -243,14 +203,10 @@ Aguarde...
 </div>
 
 <div class="footer">
-
 © <span id="year"></span> Proempy Services
-
 </div>
 
 </div>
-
-<!-- MODAL CADASTRO -->
 
 <div id="modalCadastro" class="modal">
 
@@ -263,11 +219,8 @@ Aguarde...
 <input id="data" type="date">
 
 <select id="sexo">
-
 <option value="M">Masculino</option>
-
 <option value="F">Feminino</option>
-
 </select>
 
 <button id="btnSalvar" onclick="cadastrarAluno(this)">Salvar</button>
@@ -282,144 +235,98 @@ Aguarde...
 
 document.getElementById("year").textContent=new Date().getFullYear();
 
-/* SUBMENU */
-
 function toggleSubmenu(){
-
 const s=document.getElementById("submenuAlunos");
-
 s.style.display=s.style.display==="flex"?"none":"flex";
-
 }
-
-/* MOSTRAR ÁREA */
 
 function mostrarArea(){
-
 document.getElementById("areaConteudo").style.display="block";
-
 }
 
-/* AGUARDE */
+function mostrarBusca(){
+mostrarArea();
+document.getElementById("areaBusca").style.display="block";
+}
 
 function mostrarAguarde(){
-
 msgAguarde.style.display="block";
-
 }
 
 function esconderAguarde(){
-
 msgAguarde.style.display="none";
-
 }
 
-/* MODAL */
-
 function abrirCadastro(){
-
 modalCadastro.style.display="flex";
-
 }
 
 function fecharModal(){
-
 modalCadastro.style.display="none";
-
 }
-
-/* FORMATAR DATA */
 
 function formatarData(dataISO){
-
 const [ano,mes,dia]=dataISO.split("-");
-
 return `${dia}/${mes}/${ano}`;
-
 }
-
-/* CADASTRAR */
 
 async function cadastrarAluno(btn){
 
 const texto=btn.textContent;
 
 btn.textContent="Aguarde...";
-
 btn.disabled=true;
 
 const aluno={
-
 nome:nome.value,
-
 data_nascimento:data.value,
-
 sexo:sexo.value
-
 };
 
 const res=await fetch("/alunos/",{
-
 method:"POST",
-
 headers:{"Content-Type":"application/json"},
-
 body:JSON.stringify(aluno)
-
 });
 
 btn.textContent=texto;
-
 btn.disabled=false;
 
 if(res.ok){
 
 nome.value="";
-
 data.value="";
-
 sexo.value="M";
 
 fecharModal();
-
 listarAlunos();
 
 }
 
 }
 
-/* LISTAR */
-
 async function listarAlunos(){
 
 mostrarArea();
-
+document.getElementById("areaBusca").style.display="none";
 mostrarAguarde();
 
 const res=await fetch("/alunos/");
-
 const alunos=await res.json();
 
 esconderAguarde();
 
 const tbody=document.querySelector("#tabelaAlunos tbody");
-
 tbody.innerHTML="";
-
 alunos.forEach(adicionarNaTabela);
-
 }
-
-/* BUSCAR ID */
 
 async function buscarPorID(){
 
-const id=prompt("Digite o ID:");
-
+const id=document.getElementById("buscarID").value;
 if(!id) return;
 
 mostrarArea();
-
 mostrarAguarde();
 
 const res=await fetch(`/alunos/${id}`);
@@ -431,93 +338,62 @@ if(!res.ok) return;
 const aluno=await res.json();
 
 const tbody=document.querySelector("#tabelaAlunos tbody");
-
 tbody.innerHTML="";
-
 adicionarNaTabela(aluno);
-
 }
-
-/* ADICIONAR LINHA */
 
 function adicionarNaTabela(a){
 
 const tr=document.createElement("tr");
 
 tr.innerHTML=`
-
 <td>${a.id}</td>
-
 <td>${a.nome}</td>
-
 <td>${formatarData(a.data_nascimento)}</td>
-
 <td>${a.sexo}</td>
-
 <td>
-
 <button onclick="editarLinha(this, ${a.id})">Atualizar</button>
-
 <button onclick="apagarAluno(${a.id})">Apagar</button>
-
 </td>
-
 `;
 
 document.querySelector("#tabelaAlunos tbody").appendChild(tr);
-
 }
-
-/* EDITAR */
 
 function editarLinha(btn,id){
 
 const tr=btn.parentElement.parentElement;
-
 const tds=tr.querySelectorAll("td");
 
 tds[1].contentEditable=true;
-
 tds[2].contentEditable=true;
 
 tds[1].classList.add("editavel");
-
 tds[2].classList.add("editavel");
 
 const sexoAtual=tds[3].textContent;
 
 tds[3].innerHTML=`
-
 <select class="editavel">
-
 <option value="M" ${sexoAtual==="M"?"selected":""}>M</option>
-
 <option value="F" ${sexoAtual==="F"?"selected":""}>F</option>
-
 </select>
-
 `;
 
 btn.textContent="Salvar";
-
 btn.onclick=()=>salvarEdicao(btn,tr,id);
-
 }
-
-/* SALVAR */
 
 async function salvarEdicao(btn,tr,id){
 
 const texto=btn.textContent;
 
 btn.textContent="Aguarde...";
-
 btn.disabled=true;
 
 const tds=tr.querySelectorAll("td");
 
 const nome=tds[1].textContent;
-
 const dataUsuario=tds[2].textContent;
 
 const [dia,mes,ano]=dataUsuario.split("/");
@@ -527,41 +403,26 @@ const dataISO=`${ano}-${mes}-${dia}`;
 const sexo=tds[3].querySelector("select").value;
 
 const aluno={
-
 nome:nome,
-
 data_nascimento:dataISO,
-
 sexo:sexo
-
 };
 
 const res=await fetch(`/alunos/${id}`,{
-
 method:"PUT",
-
 headers:{"Content-Type":"application/json"},
-
 body:JSON.stringify(aluno)
-
 });
 
 btn.textContent=texto;
-
 btn.disabled=false;
 
 if(res.ok) listarAlunos();
-
 }
 
-/* APAGAR */
-
 async function apagarAluno(id){
-
 await fetch(`/alunos/${id}`,{method:"DELETE"});
-
 listarAlunos();
-
 }
 
 </script>
