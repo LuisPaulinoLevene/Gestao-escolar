@@ -65,7 +65,7 @@ async def startup():
 # ==========================
 @app.get("/", include_in_schema=False)
 async def root():
-    return RedirectResponse(url="/esg_dunda")
+    return RedirectResponse(url="/ep_phandira_2")
 
 # ==========================
 # API routes (sem prefixo /api)
