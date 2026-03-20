@@ -18,8 +18,25 @@ min-height:100vh;
 width:260px;
 background:linear-gradient(180deg,#06b6d4,#22c55e);
 color:white;
-padding:25px;
+padding:20px;
 min-height:100vh;
+display:flex;
+flex-direction:column;
+}
+
+/* BOTÃO BACK */
+.back-btn{
+font-size:22px;
+cursor:pointer;
+margin-bottom:10px;
+width:fit-content;
+padding:6px 10px;
+border-radius:6px;
+transition:0.2s;
+}
+
+.back-btn:hover{
+background:rgba(255,255,255,0.25);
 }
 
 .logo{font-size:22px;font-weight:bold;margin-bottom:40px;}
@@ -151,6 +168,9 @@ text-align:right;
 
 <div class="sidebar">
 
+<!-- SETA BACK -->
+<span class="back-btn" onclick="voltarDAP()">←</span>
+
 <div class="logo">🏫 Phandira-2</div>
 
 <div class="menu">
@@ -234,6 +254,15 @@ Aguarde...
 <script>
 
 document.getElementById("year").textContent=new Date().getFullYear();
+
+/* BOTÃO VOLTAR (AGORA INTELIGENTE) */
+function voltarDAP(){
+    if (document.referrer !== "") {
+        window.history.back();
+    } else {
+        window.location.href = "/dap"; // fallback opcional
+    }
+}
 
 function toggleSubmenu(){
 const s=document.getElementById("submenuAlunos");

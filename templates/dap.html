@@ -14,10 +14,37 @@ body{display:flex;background:#f1f5f9;}
     width:260px;
     background:linear-gradient(180deg,#06b6d4,#22c55e);
     color:white;
-    padding:25px;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
 }
-.logo{font-size:22px;font-weight:bold;margin-bottom:40px;}
-.menu{display:flex;flex-direction:column;gap:12px;}
+
+/* BACK BUTTON */
+.back-btn{
+    font-size:22px;
+    cursor:pointer;
+    margin-bottom:10px;
+    width:fit-content;
+    padding:6px 10px;
+    border-radius:6px;
+    transition:0.2s;
+}
+
+.back-btn:hover{
+    background:rgba(255,255,255,0.25);
+}
+
+.logo{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:40px;
+}
+
+.menu{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
 
 .menu a{
     text-decoration:none;
@@ -83,7 +110,6 @@ body{display:flex;background:#f1f5f9;}
     z-index:1;
 }
 
-/* círculos animados */
 .fundo-animado span{
     position:absolute;
     display:block;
@@ -92,7 +118,6 @@ body{display:flex;background:#f1f5f9;}
     animation:flutuar linear infinite;
 }
 
-/* tamanhos e posições diferentes */
 .fundo-animado span:nth-child(1){
     width:220px;height:220px;left:10%;animation-duration:25s;
 }
@@ -137,20 +162,19 @@ body{display:flex;background:#f1f5f9;}
 
 <!-- SIDEBAR -->
 <div class="sidebar">
+
+    <!-- SETA NO TOPO ESQUERDO -->
+    <span class="back-btn" onclick="voltarDashboard()">←</span>
+
     <div class="logo">🏫 Phandira-2</div>
 
     <div class="menu">
-
-        <!-- BOTÃO PARA ROTA -->
         <a onclick="abrirDadosAluno()">Gerenciar alunos</a>
         <a onclick="agendarEncontros()">Agendar encontros-SMS</a>
         <a onclick="criarContacto()">Gerenciar contactos-SMS</a>
         <a onclick="criarInformacoes()">Enviar outras informacoes-SMS</a>
         <a onclick="criarAssistencias()">Fazer Plano de assistencias mútuas</a>
         <a onclick="criarAss_direccao()">Fazer Plano de assistencias de direccao</a>
-
-        <!-- Quero adicionar outros aqui futuramente -->
-
     </div>
 </div>
 
@@ -189,7 +213,7 @@ body{display:flex;background:#f1f5f9;}
 document.getElementById("year").textContent =
 new Date().getFullYear();
 
-/* Abre página independente */
+/* Rotas */
 function abrirDadosAluno(){
     window.location.href = "/dados_aluno";
 }
@@ -209,8 +233,14 @@ function criarInformacoes(){
 function criarAssistencias(){
     window.location.href = "/assistencia";
 }
-    function criarAss_direccao(){
+
+function criarAss_direccao(){
     window.location.href = "/ass_direccao";
+}
+
+/* VOLTAR */
+function voltarDashboard(){
+    window.location.href = "/ep_phandira_2";
 }
 </script>
 
