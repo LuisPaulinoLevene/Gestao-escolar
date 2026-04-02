@@ -7,14 +7,14 @@ from database import SessionLocal
 from models.assistencia import AssistenciaMutua
 from models.contactos_professores import ContactoProfessor
 
-# Intervalo de verificação do loop (em segundos)
-INTERVALO_VERIFICACAO = 30  # checa a cada 30 segundos
-
-
 # ==========================
 # Função para enviar SMS via endpoint
 # ==========================
 async def enviar_sms_api(mensagem, numeros):
+    """
+    Envia SMS usando endpoint /sms/enviar
+    Aceita número único ou lista de números
+    """
 
     base_url = os.getenv("RENDER_EXTERNAL_URL", "http://127.0.0.1:8000")
     url = f"{base_url}/sms/enviar"
@@ -45,9 +45,16 @@ async def monitorar_assistencias():
     print("🔄 Monitor automático de assistências iniciado")
 
     while True:
-
         agora = datetime.now()
-        print(f"\n📅 Verificando assistências em: {agora}")
+
+        # Calcula o tempo até o início da próxima hora
+        proxima_hora = (agora.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1))
+        tempo_ate_proxima_hora = (proxima_hora - agora).total_seconds()
+
+        print(f"\n📅 Verificando assistências em: {agora}. Próxima verificação às {proxima_hora}")
+
+        # Espera até o início da próxima hora
+        await asyncio.sleep(tempo_ate_proxima_hora)
 
         async with SessionLocal() as db:
 
@@ -170,8 +177,8 @@ async def monitorar_assistencias():
 
                 print(f"✅ SMS enviado e status atualizado para NAO (ID {a.id})")
 
-        # Espera próximo ciclo
-        await asyncio.sleep(INTERVALO_VERIFICACAO)
+        # Espera próximo ciclo (calculando o tempo até a próxima hora)
+        await asyncio.sleep(tempo_ate_proxima_hora)
 
 
 # ==========================

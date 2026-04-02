@@ -1,3 +1,4 @@
+import os
 import asyncio
 from datetime import datetime, timedelta
 import httpx
@@ -5,10 +6,6 @@ from sqlalchemy import select, update
 from database import SessionLocal
 from models.encontro import Encontro
 from routers.contactos import tipo_tabela
-import os
-
-# Intervalo de verificação do loop (em segundos)
-INTERVALO_VERIFICACAO = 30
 
 
 # ==========================
@@ -89,8 +86,19 @@ async def monitorar_encontros():
     print("🔄 Monitor automático de encontros iniciado")
 
     while True:
+        # Obtém a hora atual
         agora = datetime.now()
 
+        # Calcula o tempo até o início da próxima hora
+        proxima_hora = (agora.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1))
+        tempo_ate_proxima_hora = (proxima_hora - agora).total_seconds()
+
+        print(f"\n📅 Verificando encontros em {agora}, próxima verificação às {proxima_hora}")
+
+        # Espera até o início da próxima hora
+        await asyncio.sleep(tempo_ate_proxima_hora)
+
+        # Inicia o processo de verificação de encontros
         async with SessionLocal() as db:
             result = await db.execute(
                 select(Encontro).where(Encontro.status == "APROVADO")
@@ -98,25 +106,20 @@ async def monitorar_encontros():
             encontros = result.scalars().all()
 
             for encontro in encontros:
-
                 # ==========================
                 # 🔔 ALERTA (2 dias antes)
                 # ==========================
                 momento_alerta = encontro.data_hora - timedelta(days=2)
 
                 if encontro.alerta_enviado == "NAO" and agora >= momento_alerta:
-
                     if encontro.tipo == "PROFESSORES":
                         numeros_alerta = await pegar_numeros("diretor")
-
                     elif encontro.tipo == "FUNCIONARIOS":
                         numeros_alerta = await pegar_numeros("direcao")
-
                     else:
                         continue
 
                     if numeros_alerta:
-
                         mensagem_alerta = (
                             f"Saudacoes, ha um encontro referente a "
                             f"{encontro.titulo}, agendado para "
@@ -147,10 +150,8 @@ async def monitorar_encontros():
                 momento_convocatoria = encontro.data_hora - timedelta(days=1)
 
                 if encontro.convocatoria_enviada == "NAO" and agora >= momento_convocatoria:
-
                     if encontro.tipo == "PROFESSORES":
                         numeros_convocatoria = await pegar_numeros("professores")
-
                         mensagem_convocatoria = (
                             f"Saudacoes prezados colegas, a direccao da EP-Phandira-2 "
                             f"convoca todos os professores para reuniao referente a "
@@ -162,7 +163,6 @@ async def monitorar_encontros():
 
                     elif encontro.tipo == "FUNCIONARIOS":
                         numeros_convocatoria = await pegar_numeros("funcionarios")
-
                         mensagem_convocatoria = (
                             f"Saudacoes, a direccao da EP-Phandira-2 convoca todos os "
                             f"funcionarios para reuniao referente a {encontro.titulo}, "
@@ -187,7 +187,7 @@ async def monitorar_encontros():
                         if sucesso:
                             enviados += 1
 
-                        await asyncio.sleep(5)  # reduzir para 5s
+                        await asyncio.sleep(5)  # reduzir para 5s entre os envios
 
                     if total > 0 and enviados == total:
                         await db.execute(
@@ -201,4 +201,16 @@ async def monitorar_encontros():
                     else:
                         print(f"❌ Nem todos SMS foram enviados ({enviados}/{total})")
 
-        await asyncio.sleep(INTERVALO_VERIFICACAO)
+        # Espera até o início da próxima hora
+        await asyncio.sleep(tempo_ate_proxima_hora)
+
+
+# ==========================
+# Inicializa o monitor
+# ==========================
+async def main():
+    await monitorar_encontros()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -9,14 +9,12 @@ from models.contactos_professores import ContactoProfessor
 from models.contactos_diretor import ContactoDiretor
 
 # Intervalo de verificação do loop (em segundos)
-INTERVALO_VERIFICACAO = 30
-
+INTERVALO_VERIFICACAO = 3600  # 1 hora em segundos
 
 # ==========================
 # Função para enviar SMS via endpoint
 # ==========================
 async def enviar_sms_api(mensagem, numeros):
-
     base_url = os.getenv("RENDER_EXTERNAL_URL", "http://127.0.0.1:8000")
     url = f"{base_url}/sms/enviar"
 
@@ -28,7 +26,6 @@ async def enviar_sms_api(mensagem, numeros):
 
     async with httpx.AsyncClient() as client:
         try:
-
             resp = await client.post(url, json=payload)
 
             print(f"Resposta da API SMS: {resp.status_code}, {resp.text}")
@@ -44,15 +41,22 @@ async def enviar_sms_api(mensagem, numeros):
 # Monitor de assistências de direção
 # ==========================
 async def monitorar_assistencias_direcao():
-
     print("🔄 Monitor automático de assistências de direção iniciado")
 
     while True:
-
+        # Obtém a hora atual
         agora = datetime.now()
 
-        print(f"\n📅 Verificando assistências em {agora}")
+        # Aguardar até o início da próxima hora
+        proxima_hora = (agora.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1))
+        tempo_ate_proxima_hora = (proxima_hora - agora).total_seconds()
 
+        print(f"\n📅 Verificando assistências em {agora}, próxima verificação às {proxima_hora}")
+
+        # Espera até a próxima hora
+        await asyncio.sleep(tempo_ate_proxima_hora)
+
+        # Inicia o processo de verificação de assistências
         async with SessionLocal() as db:
 
             result = await db.execute(
@@ -65,7 +69,6 @@ async def monitorar_assistencias_direcao():
             print(f"Assistências encontradas: {len(assistencias)}")
 
             for a in assistencias:
-
                 data_assistencia = a.data_hora
 
                 # Momento em que o SMS deve ser enviado (1 dia antes)
@@ -111,7 +114,6 @@ async def monitorar_assistencias_direcao():
                 # Enviar SMS ao professor assistido
                 # ==========================
                 if professor_assistido:
-
                     numero_assistido = professor_assistido.telefone
 
                     mensagem_assistido = (
@@ -127,8 +129,7 @@ async def monitorar_assistencias_direcao():
                     )
 
                     print(f"✅ SMS enviado ao professor assistido: {numero_assistido}")
-
-                    await asyncio.sleep(30)
+                    await asyncio.sleep(30)  # Atraso entre envios
 
                 else:
                     print(f"⚠️ Professor assistido não encontrado: {a.professor_assistido_nome}")
@@ -137,7 +138,6 @@ async def monitorar_assistencias_direcao():
                 # Enviar SMS ao diretor assistente
                 # ==========================
                 if diretor_assistente:
-
                     numero_diretor = diretor_assistente.telefone
 
                     mensagem_diretor = (
@@ -153,8 +153,7 @@ async def monitorar_assistencias_direcao():
                     )
 
                     print(f"✅ SMS enviado ao diretor assistente: {numero_diretor}")
-
-                    await asyncio.sleep(30)
+                    await asyncio.sleep(30)  # Atraso entre envios
 
                 else:
                     print(f"⚠️ Diretor assistente não encontrado: {a.diretor_assistente_nome}")
@@ -172,7 +171,7 @@ async def monitorar_assistencias_direcao():
 
                 print(f"✅ Status atualizado para NAO (Assistência ID {a.id})")
 
-        # Espera próximo ciclo
+        # Aguardar até o início da próxima hora
         await asyncio.sleep(INTERVALO_VERIFICACAO)
 
 
@@ -180,10 +179,8 @@ async def monitorar_assistencias_direcao():
 # Inicializa o monitor
 # ==========================
 async def main():
-
     await monitorar_assistencias_direcao()
 
 
 if __name__ == "__main__":
-
     asyncio.run(main())
