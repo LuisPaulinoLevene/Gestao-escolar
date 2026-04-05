@@ -9,6 +9,7 @@
 html,body{height:100%;}
 body{display:flex;background:#f1f5f9;}
 
+/* SIDEBAR */
 .sidebar{
     width:260px;
     background:linear-gradient(180deg,#06b6d4,#22c55e);
@@ -16,6 +17,17 @@ body{display:flex;background:#f1f5f9;}
     padding:20px;
     display:flex;
     flex-direction:column;
+    height:100vh;      /* Ocupa toda altura da tela */
+    overflow-y:auto;   /* Adiciona rolagem se necessário */
+}
+
+/* Personalização barra de rolagem (opcional) */
+.sidebar::-webkit-scrollbar {
+    width:6px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius:3px;
 }
 
 .back-btn{
@@ -129,13 +141,12 @@ body{display:flex;background:#f1f5f9;}
 <div class="main">
 
     <div class="topbar">
-        <h3>Painel DAP</h3>
         <span id="smsCount"></span>
     </div>
 
     <div class="painel">
         <div>
-            <h2>Bem-vindo ao painel</h2>
+            <h2>Bem-vindo ao painel do DAP</h2>
             <p>Selecione uma opção no menu lateral.</p>
         </div>
     </div>
@@ -202,7 +213,6 @@ function criarContacto(){window.location.href="/contacto";}
 function criarInformacoes(){window.location.href="/informacoes";}
 function criarAssistencias(){window.location.href="/assistencia";}
 function criarAss_direccao(){window.location.href="/ass_direccao";}
-
 
 window.onload = function(){
     consultarSaldo();
