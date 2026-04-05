@@ -78,7 +78,7 @@ async function atualizarSaldo() {
         });
         const data = await res.json();
         if (data.success) {
-            const saldoSMS = Math.floor(data.data.balance * (71/98.85));
+            const saldoSMS = Math.floor(data.data.balance * (1/1.356));
             saldoEl.innerText = `Saldo SMS: ${saldoSMS}`;
         } else {
             saldoEl.innerText = "Erro ao carregar saldo";
