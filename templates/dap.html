@@ -20,13 +20,20 @@ body{display:flex;background:#f1f5f9;}
     height:100vh;      /* Ocupa toda altura da tela */
     overflow-y:auto;   /* Adiciona rolagem se necessário */
 }
+
+/* SCROLLBAR VERMELHA E SEMPRE GROSSA */
 .sidebar::-webkit-scrollbar {
-    width:6px;
+    width:12px; /* largura fixa e grossa */
 }
 .sidebar::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.3);
-    border-radius:3px;
+    background: #ff0000; /* vermelho sólido */
+    border-radius:6px;
+    border: 2px solid #f1f5f9; /* borda clara para destacar */
 }
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: #cc0000; /* vermelho mais escuro ao passar mouse */
+}
+
 .back-btn{
     font-size:22px;
     cursor:pointer;
@@ -62,6 +69,7 @@ body{display:flex;background:#f1f5f9;}
 .recarregar-btn:hover{
     background:#dc2626 !important;
 }
+
 .main{
     flex:1;
     display:flex;
