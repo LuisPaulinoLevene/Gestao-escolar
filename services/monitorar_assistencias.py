@@ -8,6 +8,11 @@ from models.assistencia import AssistenciaMutua
 from models.contactos_professores import ContactoProfessor
 
 # ==========================
+# ⏱️ Intervalo de verificação (em segundos)
+# ==========================
+INTERVALO_VERIFICACAO = 3600  # 1 hora
+
+# ==========================
 # 📩 Função para enviar SMS via endpoint
 # ==========================
 async def enviar_sms_api(mensagem, numeros):
@@ -94,7 +99,7 @@ async def monitorar_assistencias():
                     if professor_assistido:
                         mensagem_assistido = (
                             f"Saudacoes, amanha dia {a.data_hora.strftime('%d/%m/%Y')} "
-                            f"tera uma assistencia de aula na disciplina {a.disciplina} "
+                            f"tera uma assistencia de aula na disciplina de {a.disciplina} "
                             f"pelas {a.data_hora.strftime('%H:%M')}h, "
                             f"pelo professor {a.professor_assistente_nome}. Bom trabalho."
                         )
@@ -125,12 +130,10 @@ async def monitorar_assistencias():
                     print(f"✅ SMS enviado e status atualizado para NAO (ID {a.id})")
 
         # ==========================
-        # Aguardar até o início da próxima hora
+        # Aguardar intervalo fixo
         # ==========================
-        agora = datetime.now()
-        proxima_hora = (agora.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1))
-        tempo_ate_proxima_hora = (proxima_hora - agora).total_seconds()
-        await asyncio.sleep(tempo_ate_proxima_hora)
+        print(f"⏳ Aguardando {INTERVALO_VERIFICACAO} segundos para próxima verificação...")
+        await asyncio.sleep(INTERVALO_VERIFICACAO)
 
 # ==========================
 # MAIN
