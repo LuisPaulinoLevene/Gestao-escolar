@@ -64,7 +64,7 @@ async def monitorar_outros_encontros():
 
     while True:
         # 🔥 Espera 1 hora
-        await asyncio.sleep(3600)
+        await asyncio.sleep(60)
 
         # 🔥 Atualiza o tempo DEPOIS do sleep
         agora = datetime.now()
