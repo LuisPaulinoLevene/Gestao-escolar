@@ -7,6 +7,7 @@ from database import SessionLocal
 from models.outros_encontros import OutroEncontro
 from routers.contactos import tipo_tabela
 
+
 # ==========================
 # 📩 Envio de SMS usando endpoint
 # ==========================
@@ -57,87 +58,81 @@ async def pegar_numeros(tipo):
 
 
 # ==========================
-# 🔄 Monitor automático
+# 🔄 Monitor de outros encontros (EXECUÇÃO ÚNICA)
 # ==========================
 async def monitorar_outros_encontros():
-    print("🔄 Monitor automático de outros_encontros iniciado")
+    print("🔄 Execução do monitor de outros encontros")
 
-    while True:
-        # 🔥 Espera 1 hora
-        await asyncio.sleep(60)
+    agora = datetime.now()
+    print(f"\n📅 Verificando encontros em {agora}")
 
-        # 🔥 Atualiza o tempo DEPOIS do sleep
-        agora = datetime.now()
+    async with SessionLocal() as db:
+        result = await db.execute(
+            select(OutroEncontro).where(OutroEncontro.status == "APROVADO")
+        )
+        encontros = result.scalars().all()
 
-        print(f"\n📅 Verificando encontros em {agora}")
+        for encontro in encontros:
 
-        async with SessionLocal() as db:
-            result = await db.execute(
-                select(OutroEncontro).where(OutroEncontro.status == "APROVADO")
-            )
-            encontros = result.scalars().all()
+            # ==========================
+            # 🔔 ALERTA (2 dias antes)
+            # ==========================
+            momento_alerta = encontro.data_hora - timedelta(days=2)
 
-            for encontro in encontros:
+            if encontro.alerta_enviado == "NAO" and agora >= momento_alerta:
+                print(f"🔔 Enviando ALERTA para encontro {encontro.id}")
 
-                # ==========================
-                # 🔔 ALERTA (2 dias antes)
-                # ==========================
-                momento_alerta = encontro.data_hora - timedelta(days=2)
+                numeros_alerta = await pegar_numeros("diretor")
 
-                if encontro.alerta_enviado == "NAO" and agora >= momento_alerta:
-                    print(f"🔔 Enviando ALERTA para encontro {encontro.id}")
+                if numeros_alerta:
+                    mensagem_alerta = (
+                        f"Saudacoes, ha um encontro referente a '{encontro.titulo}', "
+                        f"agendado para {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h. "
+                        f"Se pretende adiar ou cancelar, entre no sistema."
+                    )
 
-                    numeros_alerta = await pegar_numeros("diretor")
+                    sucesso = await enviar_sms_api(mensagem_alerta, numeros_alerta)
 
-                    if numeros_alerta:
-                        mensagem_alerta = (
-                            f"Saudacoes, ha um encontro referente a '{encontro.titulo}', "
-                            f"agendado para {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h. "
-                            f"Se pretende adiar ou cancelar, entre no sistema."
-                        )
-
-                        sucesso = await enviar_sms_api(mensagem_alerta, numeros_alerta)
-
-                        if sucesso:
-                            await db.execute(
-                                update(OutroEncontro)
-                                .where(OutroEncontro.id == encontro.id)
-                                .values(alerta_enviado="SIM")
-                            )
-                            await db.commit()
-
-                # ==========================
-                # 📢 CONVOCATÓRIA (1 dia antes)
-                # ==========================
-                momento_convocatoria = encontro.data_hora - timedelta(days=1)
-
-                if encontro.convocatoria_enviada == "NAO" and agora >= momento_convocatoria:
-                    print(f"📢 Enviando CONVOCATÓRIA para encontro {encontro.id}")
-
-                    enviados = 0
-                    total = len(encontro.contactos)
-
-                    print("📤 Números destino:", encontro.contactos)
-
-                    for nome, numero in zip(encontro.nomes, encontro.contactos):
-                        mensagem_convocatoria = (
-                            f"Saudacoes sr(a) {nome}, esta convocado(a) para um encontro de {encontro.titulo}, a ter lugar no dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, no(a) {encontro.local}. Pede-se pontualidade."
-                        )
-
-                        sucesso = await enviar_sms_api(mensagem_convocatoria, numero)
-
-                        if sucesso:
-                            enviados += 1
-
-                        await asyncio.sleep(5)
-
-                    if total > 0 and enviados == total:
+                    if sucesso:
                         await db.execute(
                             update(OutroEncontro)
                             .where(OutroEncontro.id == encontro.id)
-                            .values(convocatoria_enviada="SIM")
+                            .values(alerta_enviado="SIM")
                         )
                         await db.commit()
+
+            # ==========================
+            # 📢 CONVOCATÓRIA (1 dia antes)
+            # ==========================
+            momento_convocatoria = encontro.data_hora - timedelta(days=1)
+
+            if encontro.convocatoria_enviada == "NAO" and agora >= momento_convocatoria:
+                print(f"📢 Enviando CONVOCATÓRIA para encontro {encontro.id}")
+
+                enviados = 0
+                total = len(encontro.contactos)
+
+                print("📤 Números destino:", encontro.contactos)
+
+                for nome, numero in zip(encontro.nomes, encontro.contactos):
+                    mensagem_convocatoria = (
+                        f"Saudacoes sr(a) {nome}, esta convocado(a) para um encontro de {encontro.titulo}, a ter lugar no dia {encontro.data_hora.strftime('%d/%m/%Y, pelas %H:%M')}h, no(a) {encontro.local}. Pede-se pontualidade."
+                    )
+
+                    sucesso = await enviar_sms_api(mensagem_convocatoria, numero)
+
+                    if sucesso:
+                        enviados += 1
+
+                    await asyncio.sleep(2)
+
+                if total > 0 and enviados == total:
+                    await db.execute(
+                        update(OutroEncontro)
+                        .where(OutroEncontro.id == encontro.id)
+                        .values(convocatoria_enviada="SIM")
+                    )
+                    await db.commit()
 
 
 # ==========================
