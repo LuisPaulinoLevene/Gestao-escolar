@@ -109,18 +109,6 @@ async def run_outros():
     return {"status": "outros encontros executado"}
 
 
-@app.get("/monitor/todos")
-async def run_todos():
-    await asyncio.gather(
-        monitorar_encontros(),
-        monitorar_assistencias(),
-        monitor_ass_direcao(),
-        monitorar_encontros_coletivo(),
-        monitorar_outros_encontros(),
-        return_exceptions=True
-    )
-    return {"status": "todos executados"}
-
 
 # ==========================
 # API ROUTES
