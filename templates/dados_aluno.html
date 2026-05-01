@@ -24,7 +24,6 @@ display:flex;
 flex-direction:column;
 }
 
-/* BOTÃO BACK */
 .back-btn{
 font-size:22px;
 cursor:pointer;
@@ -167,14 +166,10 @@ text-align:right;
 <body>
 
 <div class="sidebar">
-
-<!-- SETA BACK -->
 <span class="back-btn" onclick="voltarDAP()">←</span>
-
 <div class="logo">🏫 Phandira-2</div>
 
 <div class="menu">
-
 <a onclick="toggleSubmenu()">Seleccione uma opcao ▾</a>
 
 <div id="submenuAlunos" class="submenu">
@@ -182,7 +177,6 @@ text-align:right;
 <a onclick="listarAlunos()">Ver dados dos alunos</a>
 <a onclick="mostrarBusca()">Ver aluno por ID</a>
 </div>
-
 </div>
 </div>
 
@@ -205,7 +199,6 @@ Aguarde...
 </div>
 
 <table id="tabelaAlunos">
-
 <thead>
 <tr>
 <th>ID</th>
@@ -215,9 +208,7 @@ Aguarde...
 <th>Ação</th>
 </tr>
 </thead>
-
 <tbody></tbody>
-
 </table>
 
 </div>
@@ -229,13 +220,11 @@ Aguarde...
 </div>
 
 <div id="modalCadastro" class="modal">
-
 <div class="modal-content">
 
 <h3>Cadastrar Aluno</h3>
 
 <input id="nome" placeholder="Nome">
-
 <input id="data" type="date">
 
 <select id="sexo">
@@ -244,23 +233,20 @@ Aguarde...
 </select>
 
 <button id="btnSalvar" onclick="cadastrarAluno(this)">Salvar</button>
-
 <button onclick="fecharModal()">Cancelar</button>
 
 </div>
-
 </div>
 
 <script>
 
 document.getElementById("year").textContent=new Date().getFullYear();
 
-/* BOTÃO VOLTAR (AGORA INTELIGENTE) */
 function voltarDAP(){
     if (document.referrer !== "") {
         window.history.back();
     } else {
-        window.location.href = "/dap"; // fallback opcional
+        window.location.href = "/dap";
     }
 }
 
@@ -302,7 +288,6 @@ return `${dia}/${mes}/${ano}`;
 async function cadastrarAluno(btn){
 
 const texto=btn.textContent;
-
 btn.textContent="Aguarde...";
 btn.disabled=true;
 
@@ -322,16 +307,13 @@ btn.textContent=texto;
 btn.disabled=false;
 
 if(res.ok){
-
 nome.value="";
 data.value="";
 sexo.value="M";
 
 fecharModal();
 listarAlunos();
-
 }
-
 }
 
 async function listarAlunos(){
@@ -344,6 +326,9 @@ const res=await fetch("/alunos/");
 const alunos=await res.json();
 
 esconderAguarde();
+
+/* ORDENAÇÃO ALFABÉTICA */
+alunos.sort((a,b)=> a.nome.localeCompare(b.nome, 'pt', { sensitivity: 'base' }));
 
 const tbody=document.querySelector("#tabelaAlunos tbody");
 tbody.innerHTML="";
@@ -416,7 +401,6 @@ btn.onclick=()=>salvarEdicao(btn,tr,id);
 async function salvarEdicao(btn,tr,id){
 
 const texto=btn.textContent;
-
 btn.textContent="Aguarde...";
 btn.disabled=true;
 
@@ -426,7 +410,6 @@ const nome=tds[1].textContent;
 const dataUsuario=tds[2].textContent;
 
 const [dia,mes,ano]=dataUsuario.split("/");
-
 const dataISO=`${ano}-${mes}-${dia}`;
 
 const sexo=tds[3].querySelector("select").value;
