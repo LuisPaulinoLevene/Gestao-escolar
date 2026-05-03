@@ -13,13 +13,13 @@ from routers import (
     professor, aluno, classe, turma, matricula, admin, dap,
     director, chefe_secretaria, funcionario_secretaria, usuario_professor,
     dashboard, importar_alunos, sms, encontro, contactos, assistencias,
-    mozesms, encontro_coletivo, outros_encontros
+    mozesms, encontro_coletivo, outros_encontros,  disciplina
 )
 
 from routers.pages import (
     ep_phandira_2, dados_aluno, encontros, contacto, informacoes,
     assistencia, ass_direccao, comprar_creditos,
-    encontros_coletivo, outro_encontro
+    encontros_coletivo, outro_encontro, classes, turmas, disciplinas
 )
 
 from routers.assistencia_direcao import router as assistencia_direcao_router
@@ -67,9 +67,9 @@ async def startup():
     print("✅ Sistema iniciado (modo cron ativo)")
 
 
-# ==========================
+# ========================
 # ROTA RAIZ
-# ==========================
+# ========================
 @app.get("/", include_in_schema=False)
 async def root():
     return RedirectResponse(url="/ep_phandira_2")
@@ -139,6 +139,7 @@ app.include_router(ass_direccao.router)
 app.include_router(mozesms.router)
 app.include_router(encontro_coletivo.router)
 app.include_router(outros_encontros.router)
+app.include_router(disciplina.router)
 
 
 # ==========================
@@ -170,7 +171,9 @@ app.include_router(ass_direccao.router)
 app.include_router(comprar_creditos.router)
 app.include_router(encontro_coletivo.router)
 app.include_router(outro_encontro.router)
-
+app.include_router(classes.router)
+app.include_router(turmas.router)
+app.include_router(disciplinas.router)
 
 # ==========================
 # FIM

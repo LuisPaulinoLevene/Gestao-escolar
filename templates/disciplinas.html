@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Escolar Completo</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body { background:#f4f6f9; }
+.card { border-radius:12px; }
+
+.back-btn{
+    position:fixed;
+    top:20px;
+    left:20px;
+    font-size:22px;
+    cursor:pointer;
+    background:#06b6d4;
+    color:white;
+    padding:8px 12px;
+    border-radius:8px;
+    z-index:1000;
+}
+
+.hidden{ display:none; }
+</style>
+</head>
+
+<body>
+
+<div class="back-btn" onclick="voltar()">←</div>
+
+<div class="container mt-5">
+
+<h2 class="text-center mb-4">📚 Gerenciar Disciplinas</h2>
+<div class="card p-3 mb-3">
+<h5>Classe</h5>
+
+<select id="classeSelect" class="form-control" onchange="onClasseChange()">
+<option value="">Selecionar classe</option>
+</select>
+</div>
+
+<div class="card p-3 mb-3 hidden" id="boxClasseDisc">
+<h5>Disciplinas da Classe</h5>
+<input id="inputClasse" placeholder="Ex.: Portugues, Matematica" class="form-control">
+
+<button class="btn btn-primary w-100 mt-2" onclick="salvarClasse()">
+Guardar as disciplinas da classe
+</button>
+</div>
+<div class="card p-3 mb-3 hidden" id="boxCheck">
+<label>
+<input type="checkbox" id="checkOverride" onchange="toggleOverrideUI()">
+ Personalizar disciplinas por turma
+</label>
+</div>
+
+<div class="card p-3 mb-3 hidden" id="boxTurmas">
+<h5>Selecciona as turmas que deseja personalizar</h5>
+<select id="turmaSelect" class="form-control" multiple onchange="onTurmaChange()"></select>
+</div>
+
+<div class="card p-3 mb-3 hidden" id="boxTurmaDisc">
+<h5>Insira as sisciplinas para as turmas seleccionadas</h5>
+<input id="inputTurma" placeholder="Ex.: Cibalke, Mathicamatika" class="form-control mb-2">
+
+<button class="btn btn-primary w-100" onclick="salvarTurma()">
+Guardar as disciplinas personalizadas
+</button>
+</div>
+
+<div class="card p-3 mt-4">
+<h5>Visão Geral</h5>
+
+<table class="table table-hover mt-3">
+<thead>
+<tr>
+<th>Classe</th>
+<th>Turmas</th>
+<th>Disciplinas</th>
+<th>Ações</th>
+</tr>
+</thead>
+
+<tbody id="lista"></tbody>
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+function voltar(){
+    window.location.href = "/dap";
+}
+
+const API = "http://127.0.0.1:8000";
+const API_CLASSES = API + "/classes";
+const API_TURMAS = API + "/turmas";
+const API_DISC = API + "/disciplinas";
+
+let classes = [];
+let turmas = [];
+let disciplinas = [];
+
+/* INIT */
+async function init(){
+    await refreshBase();
+    preencherClasses();
+    listar();
+}
+
+async function refreshBase(){
+    const [c,t,d] = await Promise.all([
+        fetch(API_CLASSES + "/").then(r=>r.json()),
+        fetch(API_TURMAS + "/").then(r=>r.json()),
+        fetch(API_DISC + "/").then(r=>r.json())
+    ]);
+
+    classes = c;
+    turmas = t;
+    disciplinas = d;
+}
+
+function preencherClasses(){
+    const sel = document.getElementById("classeSelect");
+    sel.innerHTML = `<option value="">Selecionar classe</option>`;
+
+    classes.forEach(c=>{
+        sel.innerHTML += `<option value="${c.id}">${c.classe}</option>`;
+    });
+}
+
+async function refresh(){
+    await refreshBase();
+    listar();
+}
+
+/* ================= LISTAR ================= */
+function listar(){
+
+    const tbody = document.getElementById("lista");
+    tbody.innerHTML = "";
+
+    for (let c of classes) {
+
+        const base = disciplinas
+            .filter(d => d.classe_id == c.id && !d.turma_id)
+            .map(d => d.disciplina)
+            .join(", ");
+
+        const turmasClasse = turmas.filter(t => t.classe_id == c.id);
+
+        tbody.innerHTML += `
+        <tr style="background:#dbeafe">
+            <td><b>${c.classe}</b></td>
+            <td>-</td>
+            <td>${base || "-"}</td>
+            <td>
+                <button class="btn btn-sm btn-warning"
+                    onclick="editarClasse(${c.id})">Editar</button>
+
+                <button class="btn btn-sm btn-danger"
+                    onclick="apagarClasse(${c.id})">Apagar</button>
+            </td>
+        </tr>
+        `;
+
+        for (let t of turmasClasse) {
+
+            const personalizadas = disciplinas.filter(d => d.turma_id == t.id);
+
+            const texto = personalizadas.length
+                ? personalizadas.map(d => d.disciplina).join(", ")
+                : base;
+
+            const badge = personalizadas.length
+                ? "<small style='color:red'>🔴 Personalizada</small>"
+                : "";
+
+            const actions = personalizadas.length
+                ? `
+                    <button class="btn btn-sm btn-warning"
+                        onclick="editarTurma(${t.id})">Editar</button>
+
+                    <button class="btn btn-sm btn-danger"
+                        onclick="apagarTurma(${t.id})">Apagar</button>
+                `
+                : "";
+
+            tbody.innerHTML += `
+            <tr>
+                <td></td>
+                <td><b>${t.turma}</b> ${badge}</td>
+                <td>${texto || "-"}</td>
+                <td>${actions}</td>
+            </tr>
+            `;
+        }
+    }
+}
+
+/* ================= CORREÇÃO AQUI ================= */
+
+/* EDITAR CLASSE */
+function editarClasse(id){
+
+    document.getElementById("classeSelect").value = id;
+
+    onClasseChange();
+
+    const existentes = disciplinas
+        .filter(d => d.classe_id == id && !d.turma_id)
+        .map(d => d.disciplina)
+        .join(", ");
+
+    document.getElementById("inputClasse").value = existentes;
+}
+
+/* SALVAR CLASSE (SUBSTITUI) */
+async function salvarClasse(){
+
+    const classe_id = document.getElementById("classeSelect").value;
+    const disc = document.getElementById("inputClasse").value;
+
+    const antigas = disciplinas.filter(d => d.classe_id == classe_id && !d.turma_id);
+
+    for(let a of antigas){
+        await fetch(API_DISC + "/" + a.id, { method:"DELETE" });
+    }
+
+    for(let d of disc.split(",").map(x=>x.trim()).filter(Boolean)){
+        await fetch(API_DISC + "/", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({
+                disciplina:d,
+                classe_id,
+                turma_id:null,
+                is_personalizada:false
+            })
+        });
+    }
+
+    await refresh();
+}
+
+/* RESTO IGUAL */
+function onClasseChange(){
+    const id = document.getElementById("classeSelect").value;
+    if(!id) return;
+
+    document.getElementById("boxCheck").classList.remove("hidden");
+    document.getElementById("boxClasseDisc").classList.remove("hidden");
+
+    const sel = document.getElementById("turmaSelect");
+    sel.innerHTML = "";
+
+    turmas.filter(t=>t.classe_id==id).forEach(t=>{
+        sel.innerHTML += `<option value="${t.id}">${t.turma}</option>`;
+    });
+}
+
+function toggleOverrideUI(){
+    const checked = document.getElementById("checkOverride").checked;
+    document.getElementById("boxTurmas").classList.toggle("hidden", !checked);
+    document.getElementById("boxTurmaDisc").classList.add("hidden");
+}
+
+function onTurmaChange(){
+    const sel = document.getElementById("turmaSelect");
+    document.getElementById("boxTurmaDisc")
+        .classList.toggle("hidden", sel.selectedOptions.length === 0);
+}
+
+async function salvarTurma(){
+
+    const classe_id = document.getElementById("classeSelect").value;
+
+    const turmasSel = Array.from(
+        document.getElementById("turmaSelect").selectedOptions
+    ).map(o=>o.value);
+
+    const disc = document.getElementById("inputTurma").value;
+
+    for(let turma_id of turmasSel){
+
+        const antigas = disciplinas.filter(d => d.turma_id == turma_id);
+
+        for(let a of antigas){
+            await fetch(API_DISC + "/" + a.id, { method:"DELETE" });
+        }
+
+        for(let d of disc.split(",").map(x=>x.trim()).filter(Boolean)){
+            await fetch(API_DISC + "/", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({
+                    disciplina:d,
+                    classe_id,
+                    turma_id,
+                    is_personalizada:true
+                })
+            });
+        }
+    }
+
+    document.getElementById("inputTurma").value = "";
+    await refresh();
+}
+
+function editarTurma(turma_id){
+    const lista = disciplinas.filter(d => d.turma_id == turma_id);
+    document.getElementById("inputTurma").value =
+        lista.map(d => d.disciplina).join(", ");
+    document.getElementById("boxTurmaDisc").classList.remove("hidden");
+}
+
+async function apagarTurma(turma_id){
+    const alvo = disciplinas.filter(d => d.turma_id == turma_id);
+    for(let d of alvo){
+        await fetch(API_DISC + "/" + d.id, { method:"DELETE" });
+    }
+    await refresh();
+}
+
+async function apagarClasse(id){
+    const alvo = disciplinas.filter(d => d.classe_id == id);
+    for(let d of alvo){
+        await fetch(API_DISC + "/" + d.id, { method:"DELETE" });
+    }
+    await refresh();
+}
+
+init();
+
+</script>
+
+</body>
+</html>

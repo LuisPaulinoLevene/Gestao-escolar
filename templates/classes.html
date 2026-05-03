@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>CRUD Classes</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* BOTÃO BACK */
+        .back-btn{
+        position:fixed;
+        top:20px;
+        left:20px;
+        font-size:22px;
+        cursor:pointer;
+        background:#06b6d4;
+        color:white;
+        padding:8px 12px;
+        border-radius:8px;
+        transition:0.3s;
+        z-index:1000;
+        }
+        body {
+            background: #f4f6f9;
+        }
+        .card {
+            border-radius: 12px;
+        }
+        .btn {
+            border-radius: 8px;
+        }
+        #lista .item {
+            transition: 0.2s;
+        }
+        #lista .item:hover {
+            background: #f1f1f1;
+        }
+    </style>
+</head>
+
+<body>
+<!-- BOTÃO VOLTAR -->
+<div class="back-btn" onclick="voltarPagina()">←</div>
+<div class="container mt-5">
+
+    <h1 class="text-center mb-4">📚 Gestão de Classes</h1>
+
+    <div class="row">
+
+        <!-- Criar -->
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h5>Criar Classe</h5>
+                <input type="text" id="novaClasse" class="form-control mb-2" placeholder="Nome da classe">
+                <button class="btn btn-primary w-100" onclick="criarClasse()">Criar</button>
+            </div>
+        </div>
+
+        <!-- Buscar -->
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h5>Buscar por ID</h5>
+                <input type="number" id="buscarId" class="form-control mb-2" placeholder="ID">
+                <button class="btn btn-info w-100" onclick="buscarClasse()">Buscar</button>
+                <div id="resultadoBusca" class="mt-2 text-muted small"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Lista -->
+    <div class="card mt-4 p-3 shadow-sm">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5>Lista de Classes</h5>
+        </div>
+
+        <table class="table table-hover mt-3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="lista"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+/* BOTÃO VOLTAR */
+function voltarPagina(){
+    if(document.referrer !== ""){
+        window.history.back();
+    }else{
+        window.location.href = "/dap";
+    }
+}
+
+const API_URL = window.location.origin + "/classes";
+
+// Criar
+async function criarClasse() {
+    const nome = document.getElementById("novaClasse").value;
+
+    if (!nome) return;
+
+    await fetch(API_URL + "/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classe: nome })
+    });
+
+    document.getElementById("novaClasse").value = "";
+    listarClasses();
+}
+
+// Listar
+async function listarClasses() {
+    const res = await fetch(API_URL + "/");
+    const data = await res.json();
+
+    const lista = document.getElementById("lista");
+    lista.innerHTML = "";
+
+    data.forEach(c => {
+        lista.innerHTML += `
+            <tr class="item">
+                <td>${c.id}</td>
+                <td>${c.classe}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="editar(${c.id}, '${c.classe}')">Editar</button>
+                    <button class="btn btn-sm btn-danger" onclick="apagarClasseDireto(${c.id})">Apagar</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// Buscar
+async function buscarClasse() {
+    const id = document.getElementById("buscarId").value;
+
+    const res = await fetch(API_URL + "/" + id);
+    const data = await res.json();
+
+    document.getElementById("resultadoBusca").innerText =
+        data.classe ? `Nome: ${data.classe}` : data.detail;
+}
+
+// Editar
+function editar(id, nome) {
+    document.getElementById("novaClasse").value = nome;
+    document.getElementById("novaClasse").focus();
+
+    const btn = document.querySelector(".btn-primary");
+    btn.innerText = "Atualizar";
+    btn.onclick = () => atualizarClasse(id);
+}
+
+// Atualizar
+async function atualizarClasse(id) {
+    const nome = document.getElementById("novaClasse").value;
+
+    await fetch(API_URL + "/" + id, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ classe: nome })
+    });
+
+    const btn = document.querySelector(".btn-primary");
+    btn.innerText = "Criar";
+    btn.onclick = criarClasse;
+
+    document.getElementById("novaClasse").value = "";
+    listarClasses();
+}
+
+// Apagar direto
+async function apagarClasseDireto(id) {
+    await fetch(API_URL + "/" + id, { method: "DELETE" });
+    listarClasses();
+}
+
+// Carregar ao abrir
+listarClasses();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestão de Turmas</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* BOTÃO BACK */
+        .back-btn{
+        position:fixed;
+        top:20px;
+        left:20px;
+        font-size:22px;
+        cursor:pointer;
+        background:#06b6d4;
+        color:white;
+        padding:8px 12px;
+        border-radius:8px;
+        transition:0.3s;
+        z-index:1000;
+        }
+        body { background: #f4f6f9; }
+        .card { border-radius: 12px; }
+        .btn { border-radius: 8px; }
+    </style>
+</head>
+
+<body>
+<!-- BOTÃO VOLTAR -->
+<div class="back-btn" onclick="voltarPagina()">←</div>
+
+<div class="container mt-5">
+
+    <h2 class="text-center mb-4">🏫 Gestão de Turmas</h2>
+
+    <!-- Selecionar Classe -->
+    <div class="card p-3 shadow-sm mb-3">
+        <h5>Selecionar Classe</h5>
+
+        <select id="classeSelect" class="form-control mb-2" onchange="mostrarInput()">
+            <option value="">Escolher classe</option>
+        </select>
+    </div>
+
+    <!-- Criar Turmas -->
+    <div class="card p-3 shadow-sm mb-4" id="boxTurmas" style="display:none;">
+        <h5>Insira Turmas (separadas por vírgula)</h5>
+
+        <input type="text" id="nomesTurmas" class="form-control mb-2"
+               placeholder="Ex: A, B, C">
+
+        <button class="btn btn-primary w-100" onclick="criarTurmas()">
+            Criar Turmas
+        </button>
+
+        <div id="msgErro" class="text-danger small mt-2"></div>
+    </div>
+
+    <!-- Lista -->
+    <div class="card p-3 shadow-sm">
+        <h5>Lista por Classe</h5>
+
+        <table class="table table-hover mt-3">
+            <thead>
+                <tr>
+                    <th>Classe</th>
+                    <th>Turmas</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="listaTurmas"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+/* BOTÃO VOLTAR */
+function voltarPagina(){
+    if(document.referrer !== ""){
+        window.history.back();
+    }else{
+        window.location.href = "/dap";
+    }
+}
+const API_TURMAS = window.location.origin + "/turmas";
+const API_CLASSES = window.location.origin + "/classes";
+
+let todasTurmas = [];
+let todasClasses = [];
+let editandoClasseId = null;
+
+// ==================== CARREGAR CLASSES ====================
+async function carregarClasses() {
+    const res = await fetch(API_CLASSES + "/");
+    todasClasses = await res.json();
+
+    const select = document.getElementById("classeSelect");
+
+    todasClasses.forEach(c => {
+        select.innerHTML += `<option value="${c.id}">${c.classe}</option>`;
+    });
+}
+
+// ==================== MOSTRAR INPUT ====================
+function mostrarInput() {
+    const classe = document.getElementById("classeSelect").value;
+    document.getElementById("boxTurmas").style.display = classe ? "block" : "none";
+}
+
+// ==================== LISTAR AGRUPADO ====================
+async function listarTurmas() {
+    const res = await fetch(API_TURMAS + "/");
+    todasTurmas = await res.json();
+
+    const lista = document.getElementById("listaTurmas");
+    lista.innerHTML = "";
+
+    // agrupar por classe
+    todasClasses.forEach(classe => {
+
+        const turmasDaClasse = todasTurmas
+            .filter(t => t.classe_id === classe.id);
+
+        const nomes = turmasDaClasse.map(t => t.turma).join(", ");
+
+        lista.innerHTML += `
+            <tr>
+                <td>${classe.classe}</td>
+                <td>${nomes || "-"}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="editar(${classe.id})">
+                        Atualizar
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+// ==================== EDITAR (carrega turmas da classe) ====================
+function editar(classe_id) {
+    editandoClasseId = classe_id;
+
+    document.getElementById("classeSelect").value = classe_id;
+    mostrarInput();
+
+    const turmasDaClasse = todasTurmas
+        .filter(t => t.classe_id === classe_id)
+        .map(t => t.turma)
+        .join(", ");
+
+    document.getElementById("nomesTurmas").value = turmasDaClasse;
+}
+
+// ==================== CRIAR / ATUALIZAR ====================
+async function criarTurmas() {
+    const classe_id = Number(document.getElementById("classeSelect").value);
+    const nomes = document.getElementById("nomesTurmas").value;
+
+    const erroDiv = document.getElementById("msgErro");
+    erroDiv.innerText = "";
+
+    if (!classe_id || !nomes) return;
+
+    let lista = nomes.split(",").map(n => n.trim()).filter(n => n);
+
+    const existentes = todasTurmas
+        .filter(t => t.classe_id === classe_id)
+        .map(t => t.turma.toLowerCase());
+
+    const duplicadas = lista.filter(n => existentes.includes(n.toLowerCase()));
+
+    if (duplicadas.length > 0 && editandoClasseId === null) {
+        erroDiv.innerText = "Já existem: " + duplicadas.join(", ");
+        return;
+    }
+
+    // modo edição: apagar antigas e recriar
+    if (editandoClasseId !== null) {
+        const antigas = todasTurmas.filter(t => t.classe_id === classe_id);
+
+        for (let t of antigas) {
+            await fetch(API_TURMAS + "/" + t.id, { method: "DELETE" });
+        }
+
+        editandoClasseId = null;
+    }
+
+    // criar novas
+    for (let nome of lista) {
+        await fetch(API_TURMAS + "/", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                turma: nome,
+                classe_id: classe_id
+            })
+        });
+    }
+
+    document.getElementById("nomesTurmas").value = "";
+    listarTurmas();
+}
+
+// ==================== INIT ====================
+carregarClasses().then(listarTurmas);
+</script>
+
+</body>
+</html>

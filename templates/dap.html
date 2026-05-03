@@ -1,150 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <title>SIGE — EP Phandira-2</title>
+<meta charset="UTF-8">
+<title>SIGE — EP Phandira-2</title>
 
-    <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-        html,body{height:100%;}
-        body{display:flex;background:#f1f5f9;}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-        /* SIDEBAR */
-        .sidebar{
-            width:260px;
-            background:linear-gradient(180deg,#06b6d4,#22c55e);
-            color:white;
-            padding:20px;
-            display:flex;
-            flex-direction:column;
-            height:100vh;      /* Ocupa toda altura da tela */
-            overflow-y:auto;   /* Adiciona rolagem se necessário */
-        }
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+html,body{height:100%;}
+body{display:flex;background:#f1f5f9;}
 
-        /* SCROLLBAR VERMELHA E SEMPRE GROSSA */
-        .sidebar::-webkit-scrollbar {
-            width:12px; /* largura fixa e grossa */
-        }
-        .sidebar::-webkit-scrollbar-thumb {
-            background: #ff0000; /* vermelho sólido */
-            border-radius:6px;
-            border: 2px solid #f1f5f9; /* borda clara para destacar */
-        }
-        .sidebar::-webkit-scrollbar-thumb:hover {
-            background: #cc0000; /* vermelho mais escuro ao passar mouse */
-        }
+/* SIDEBAR (ÍCONES) */
+.sidebar{
+    width:90px;
+    background:linear-gradient(180deg,#06b6d4,#22c55e);
+    color:white;
+    padding:20px 10px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    height:100vh;
+    overflow-y:auto;
+}
 
-        .back-btn{
-            font-size:22px;
-            cursor:pointer;
-            margin-bottom:10px;
-            padding:6px 10px;
-            border-radius:6px;
-        }
-        .back-btn:hover{background:rgba(255,255,255,0.25);}
-        .logo{
-            font-size:22px;
-            font-weight:bold;
-            margin-bottom:40px;
-        }
-        .menu{
-            display:flex;
-            flex-direction:column;
-            gap:12px;
-        }
-        .menu a{
-            text-decoration:none;
-            color:white;
-            padding:12px;
-            border-radius:8px;
-            background:rgba(255,255,255,0.1);
-            cursor:pointer;
-        }
-        .menu a:hover{background:rgba(255,255,255,0.25);}
-        .recarregar-btn{
-            background:#ef4444 !important;
-            font-weight:bold;
-            text-align:center;
-        }
-        .recarregar-btn:hover{
-            background:#dc2626 !important;
-        }
+/* Seta de voltar */
+.back-btn{
+    font-size:22px;
+    cursor:pointer;
+    margin-bottom:10px;
+    padding:6px 10px;
+    border-radius:6px;
+}
 
-        .main{
-            flex:1;
-            display:flex;
-            flex-direction:column;
-            position:relative;
-        }
-        .topbar{
-            height:70px;
-            background:white;
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding:0 30px;
-            box-shadow:0 2px 8px rgba(0,0,0,0.05);
-        }
-        .painel{
-            flex:1;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            text-align:center;
-        }
-        .footer{
-            padding:12px 30px;
-            font-size:13px;
-            color:#64748b;
-            background:white;
-            text-align:right;
-        }
-        #smsCount{
-            font-weight:bold;
-            position:absolute;
-            right:30px;
-            top:20px;
-        }
-        .error-message {
-            text-align: center;
-            padding: 20px;
-            background-color: #ffcccc;
-            color: red;
-            border: 2px solid red;
-            border-radius: 5px;
-            display: none;
-        }
-        .retry-button {
-            background-color: #f39c12;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .retry-button:hover {
-            background-color: #e67e22;
-        }
-    </style>
+.back-btn:hover{
+    background:rgba(255,255,255,0.25);
+}
+
+/* SCROLL */
+.sidebar::-webkit-scrollbar {
+    width:12px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: #ff0000;
+    border-radius:6px;
+    border: 2px solid #f1f5f9;
+}
+
+.logo{
+    font-size:20px;
+    margin-bottom:30px;
+}
+
+.menu{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.menu a{
+    width:50px;
+    height:50px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    background:rgba(255,255,255,0.1);
+    color:white;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.menu a:hover{
+    background:rgba(255,255,255,0.25);
+}
+
+.recarregar-btn{
+    background:#ef4444 !important;
+}
+
+/* MAIN */
+.main{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+}
+
+.topbar{
+    height:70px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.painel{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.footer{
+    padding:12px 30px;
+    font-size:13px;
+    color:#64748b;
+    background:white;
+    text-align:right;
+}
+
+#smsCount{
+    font-weight:bold;
+    position:absolute;
+    right:30px;
+    top:20px;
+}
+
+/* ERRO */
+.error-message {
+    text-align: center;
+    padding: 20px;
+    background-color: #ffcccc;
+    color: red;
+    border: 2px solid red;
+    border-radius: 5px;
+    display: none;
+}
+
+.retry-button {
+    background-color: #f39c12;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+</style>
 </head>
 
 <body>
 
 <div class="sidebar">
+    <!-- Adicionando a seta de voltar -->
     <span class="back-btn" onclick="voltarDashboard()">←</span>
 
-    <div class="logo">🏫 Phandira-2</div>
+    <div class="logo">🏫</div>
 
     <div class="menu">
-        <a onclick="verificarESeguirei(abrirDadosAluno)">Gerenciar alunos</a>
-        <a onclick="verificarESeguirei(criarContacto)">Gerenciar contactos de funcionarios-SMS</a>
-        <a onclick="verificarESeguirei(agendarEncontros)">Agendar encontros-SMS</a>
-        <a onclick="verificarESeguirei(agendarEncontros_coletivo)">Agendar encontros do colectivo da direcção</a>
-        <a onclick="verificarESeguirei(agendarOutros_encontros)">Agendar encontros com elementos/grupo específicos</a>
-        <a onclick="verificarESeguirei(criarInformacoes)">Enviar outras informacoes-SMS</a>
-        <a onclick="verificarESeguirei(criarAssistencias)">Assistências mútuas</a>
-        <a onclick="verificarESeguirei(criarAss_direccao)">Assistências direcção</a>
-        <a class="recarregar-btn" onclick="verificarESeguirei(recarregarSMS)">💳 Recarregar SMS</a>
+        <a onmouseover="mostrarInfo('Gerenciar alunos')" onmouseout="resetInfo()" onclick="verificarESeguirei(abrirDadosAluno)"><i class="fas fa-user-graduate"></i></a>
+        <a onmouseover="mostrarInfo('Gerenciar Classes')" onmouseout="resetInfo()" onclick="verificarESeguirei(abrirClasses)"><i class="fas fa-layer-group"></i></a>
+        <a onmouseover="mostrarInfo('Gerenciar Disciplinas')" onmouseout="resetInfo()" onclick="verificarESeguirei(abrirDisciplinas)"><i class="fas fa-book"></i></a>
+        <a onmouseover="mostrarInfo('Gerenciar Turmas')" onmouseout="resetInfo()" onclick="verificarESeguirei(abrirTurmas)"><i class="fas fa-users"></i></a>
+        <a onmouseover="mostrarInfo('Contactos SMS')" onmouseout="resetInfo()" onclick="verificarESeguirei(criarContacto)"><i class="fas fa-address-book"></i></a>
+        <a onmouseover="mostrarInfo('Agendar encontros')" onmouseout="resetInfo()" onclick="verificarESeguirei(agendarEncontros)"><i class="fas fa-calendar"></i></a>
+        <a onmouseover="mostrarInfo('Encontros direcção')" onmouseout="resetInfo()" onclick="verificarESeguirei(agendarEncontros_coletivo)"><i class="fas fa-calendar-check"></i></a>
+        <a onmouseover="mostrarInfo('Outros encontros')" onmouseout="resetInfo()" onclick="verificarESeguirei(agendarOutros_encontros)"><i class="fas fa-calendar-plus"></i></a>
+        <a onmouseover="mostrarInfo('Enviar informações')" onmouseout="resetInfo()" onclick="verificarESeguirei(criarInformacoes)"><i class="fas fa-envelope"></i></a>
+        <a onmouseover="mostrarInfo('Assistências mútuas')" onmouseout="resetInfo()" onclick="verificarESeguirei(criarAssistencias)"><i class="fas fa-hands-helping"></i></a>
+        <a onmouseover="mostrarInfo('Assistências direcção')" onmouseout="resetInfo()" onclick="verificarESeguirei(criarAss_direccao)"><i class="fas fa-user-tie"></i></a>
+        <a class="recarregar-btn" onmouseover="mostrarInfo('Recarregar SMS')" onmouseout="resetInfo()" onclick="verificarESeguirei(recarregarSMS)"><i class="fas fa-credit-card"></i></a>
     </div>
 </div>
 
@@ -154,7 +172,7 @@
     </div>
 
     <div class="painel">
-        <div>
+        <div id="painelConteudo">
             <h2>Bem-vindo ao painel do DAP</h2>
             <p>Selecione uma opção no menu lateral.</p>
         </div>
@@ -171,104 +189,108 @@
 </div>
 
 <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+document.getElementById("year").textContent = new Date().getFullYear();
 
-    let funcaoParaRedirecionar = null; // Variável para armazenar a função de navegação a ser chamada depois
+/* ========= PAINEL DINÂMICO ========= */
+function mostrarInfo(texto){
+    document.getElementById("painelConteudo").innerHTML = `
+        <h2>${texto}</h2>
+        <p>Clique para acessar esta funcionalidade.</p>
+    `;
+}
 
-    // Função de verificação da API e redirecionamento
-    async function fetchDataAndRedirect() {
-        const errorMessageDiv = document.getElementById("error-message");
+function resetInfo(){
+    document.getElementById("painelConteudo").innerHTML = `
+        <h2>Bem-vindo ao painel do DAP</h2>
+        <p>Selecione uma opção no menu lateral.</p>
+    `;
+}
 
-        try {
-            const apiResponse = await fetch("https://api.mozesms.com/v1/account/balance", {
-                headers: { 'Authorization': `Bearer ${'bWtfZWI2ZjdiZDRmNTE4OWMyM2U0MTQ1NGQ4YjE0NzgxYjk6MTM2OnNrX2IxMzZlMmEyOWY1ZmI3MzkzYWE1OTU1YmM4MDFhZjE1YzQ1MDE4MGIyMTJkNzdiNTcwMzhiYzRjMjRmMzA2NTA='}` }
-            });
+/* ========= LÓGICA ORIGINAL (INALTERADA) ========= */
 
-            if (apiResponse.ok) {
-                // Se a API for bem-sucedida, chama a função armazenada
-                funcaoParaRedirecionar();
-            } else {
-                throw new Error("Falha ao buscar dados.");
-            }
-        } catch (error) {
-            errorMessageDiv.style.display = "block";  // Exibe a mensagem de erro
+let funcaoParaRedirecionar = null;
+
+async function fetchDataAndRedirect() {
+    const errorMessageDiv = document.getElementById("error-message");
+
+    try {
+        const apiResponse = await fetch("https://api.mozesms.com/v1/account/balance", {
+            headers: { 'Authorization': `Bearer ${'bWtfZWI2ZjdiZDRmNTE4OWMyM2U0MTQ1NGQ4YjE0NzgxYjk6MTM2OnNrX2IxMzZlMmEyOWY1ZmI3MzkzYWE1OTU1YmM4MDFhZjE1YzQ1MDE4MGIyMTJkNzdiNTcwMzhiYzRjMjRmMzA2NTA='}` }
+        });
+
+        if (apiResponse.ok) {
+            funcaoParaRedirecionar();
+        } else {
+            throw new Error();
         }
+    } catch {
+        errorMessageDiv.style.display = "block";
     }
+}
 
-    // Função para tentar novamente
-    function tentarNovamente() {
-        const errorMessageDiv = document.getElementById("error-message");
-        errorMessageDiv.style.display = "none"; // Esconde a mensagem de erro
+function tentarNovamente() {
+    document.getElementById("error-message").style.display = "none";
+    fetchDataAndRedirect();
+}
 
-        // Re-executa a verificação da API
-        fetchDataAndRedirect();
-    }
+function verificarESeguirei(funcao) {
+    funcaoParaRedirecionar = funcao;
+    fetchDataAndRedirect();
+}
 
-    // Função que armazena a função de navegação original e chama a verificação
-    function verificarESeguirei(funcao) {
-        funcaoParaRedirecionar = funcao; // Armazena a função
-        fetchDataAndRedirect(); // Verifica a API antes de redirecionar
-    }
+/* ROTAS */
+function voltarDashboard() { window.location.href = "/ep_phandira_2"; }
+function abrirDadosAluno() { window.location.href = "/dados_aluno"; }
+function abrirClasses() { window.location.href = "/classes"; }
+function abrirDisciplinas() { window.location.href = "/disciplinas"; }
+function abrirTurmas() { window.location.href = "/turmas"; }
+function agendarEncontros() { window.location.href = "/encontros"; }
+function agendarEncontros_coletivo() { window.location.href = "/encontros_coletivo"; }
+function agendarOutros_encontros() { window.location.href = "/outro_encontro"; }
+function criarContacto() { window.location.href = "/contacto"; }
+function criarInformacoes() { window.location.href = "/informacoes"; }
+function criarAssistencias() { window.location.href = "/assistencia"; }
+function criarAss_direccao() { window.location.href = "/ass_direccao"; }
+function recarregarSMS(){ window.location.href = "/comprar_creditos"; }
 
-    // Funções de navegação
-    function voltarDashboard() { window.location.href = "/ep_phandira_2"; }
-    function abrirDadosAluno() { window.location.href = "/dados_aluno"; }
-    function agendarEncontros() { window.location.href = "/encontros"; }
-    function agendarEncontros_coletivo() { window.location.href = "/encontros_coletivo"; }
-    function agendarOutros_encontros() { window.location.href = "/outro_encontro"; }
-    function criarContacto() { window.location.href = "/contacto"; }
-    function criarInformacoes() { window.location.href = "/informacoes"; }
-    function criarAssistencias() { window.location.href = "/assistencia"; }
-    function criarAss_direccao() { window.location.href = "/ass_direccao"; }
+/* SALDO */
+window.onload = function() {
+    consultarSaldo();
+    setInterval(consultarSaldo, 10000);
+};
 
-    // Função recarregar SMS
-    function recarregarSMS(){
-        window.location.href = "/comprar_creditos";
-    }
+async function consultarSaldo() {
+    const url = "https://api.mozesms.com/v1/account/balance";
+    const token = "bWtfZWI2ZjdiZDRmNTE4OWMyM2U0MTQ1NGQ4YjE0NzgxYjk6MTM2OnNrX2IxMzZlMmEyOWY1ZmI3MzkzYWE1OTU1YmM4MDFhZjE1YzQ1MDE4MGIyMTJkNzdiNTcwMzhiYzRjMjRmMzA2NTA=";
 
-    window.onload = function() {
-        consultarSaldo();
-        setInterval(consultarSaldo, 10000);
-    };
+    try {
+        const response = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
 
-    async function consultarSaldo() {
-        const url = "https://api.mozesms.com/v1/account/balance";
-        const token = "bWtfZWI2ZjdiZDRmNTE4OWMyM2U0MTQ1NGQ4YjE0NzgxYjk6MTM2OnNrX2IxMzZlMmEyOWY1ZmI3MzkzYWE1OTU1YmM4MDFhZjE1YzQ1MDE4MGIyMTJkNzdiNTcwMzhiYzRjMjRmMzA2NTA=";
+        if (!response.ok) throw new Error();
 
-        try {
-            const response = await fetch(url, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+        const data = await response.json();
 
-            if (!response.ok) throw new Error('Erro ao consultar saldo');
-
-            const data = await response.json();
-
-            if (data.success) {
-                const saldo = data.data.balance;
-                const sms = Math.floor(saldo * (1/1.356)); // ✅ Usando Math.floor
-                mostrarSmsEquivalentes(sms);
-            }
-
-        } catch (error) {
-            document.getElementById('smsCount').textContent = "Erro ao carregar saldo";
+        if (data.success) {
+            const saldo = data.data.balance;
+            const sms = Math.floor(saldo * (1/1.356));
+            mostrarSmsEquivalentes(sms);
         }
-    }
 
-    function mostrarSmsEquivalentes(sms){
-        const el = document.getElementById('smsCount');
-        el.innerHTML = `Saldo SMS: ${sms}`; // apenas inteiro
-
-        if (sms <= 100){
-            el.innerHTML += `
-                <br>
-                <span style="color:red;cursor:pointer;"
-                      onclick="recarregarSMS()">
-                      Recarregar
-                </span>
-            `;
-        }
+    } catch {
+        document.getElementById('smsCount').textContent = "Erro ao carregar saldo";
     }
+}
+
+function mostrarSmsEquivalentes(sms){
+    const el = document.getElementById('smsCount');
+    el.innerHTML = `Saldo SMS: ${sms}`;
+
+    if (sms <= 100){
+        el.innerHTML += `<br><span style="color:red;cursor:pointer;" onclick="recarregarSMS()">Recarregar</span>`;
+    }
+}
 </script>
 
 </body>
