@@ -6,7 +6,12 @@ from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # Banco de dados
-from database import Base, engine
+from database.primary import Base, engine_primary
+from database.secondary import engine_secondary
+from services.failover_service import status_bancos
+from services.replication_service import replicar_eventos
+from services.audit import registrar_auditoria
+from services.sync_worker import start_sync_worker
 
 # Routers API e Pages
 from routers import (
@@ -35,6 +40,8 @@ from services.monitor_outros_encontros import monitorar_outros_encontros
 # Configuração ambiente
 # ==========================
 is_production = os.getenv("ENV") == "production"
+# Evita registrar auditoria duas vezes
+AUDIT_REGISTRADO = False
 
 app = FastAPI(
     title="Sistema de Gestão de SMS",
@@ -61,10 +68,47 @@ app.add_middleware(
 # ==========================
 @app.on_event("startup")
 async def startup():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
-    print("✅ Sistema iniciado (modo cron ativo)")
+    global AUDIT_REGISTRADO
+
+    print("Iniciando sistema...")
+
+    try:
+        async with engine_primary.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("✅ Principal conectado")
+    except Exception as e:
+        print("❌ Principal:", e)
+
+    try:
+        async with engine_secondary.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("✅ Secundário conectado")
+    except Exception as e:
+        print("❌ Secundário:", e)
+
+    if not AUDIT_REGISTRADO:
+        registrar_auditoria(Base)
+        AUDIT_REGISTRADO = True
+        print("✅ Auditoria registrada")
+
+    asyncio.create_task(start_sync_worker())
+
+    print("✅ Sistema iniciado")
+
+@app.get("/system/database")
+async def database_status():
+
+    return await status_bancos()
+
+@app.get("/sync/database")
+async def sync_database():
+
+    await replicar_eventos()
+
+    return {
+        "status":"sincronização concluída"
+    }
 
 
 # ========================
