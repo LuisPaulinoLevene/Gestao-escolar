@@ -218,6 +218,7 @@ app.include_router(outro_encontro.router)
 app.include_router(classes.router)
 app.include_router(turmas.router)
 app.include_router(disciplinas.router)
+app.include_router(encontros_coletivo.router)
 
 # ==========================
 # FIM
