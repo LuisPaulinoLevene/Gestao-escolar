@@ -62,6 +62,12 @@ async def monitorar_assistencias():
             if agora >= a.data_hora:
                 print(f"⚠️ Assistência já passou (ID {a.id})")
                 continue
+            
+            # Só envia um dia antes
+            dia_envio = (a.data_hora - timedelta(days=1)).date()
+            
+            if agora.date() != dia_envio:
+                continue
 
             # ==========================
             # Buscar professor assistido
