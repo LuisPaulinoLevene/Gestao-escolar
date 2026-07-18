@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Minha Turma</title>
+
+
+<style>
+
+*{
+    box-sizing:border-box;
+    font-family:"Times New Roman",serif;
+}
+
+
+body{
+
+    margin:0;
+    padding:20px;
+    background:#ececec;
+
+}
+
+
+.container{
+
+    max-width:900px;
+    margin:auto;
+
+}
+
+
+.folha{
+
+    background:#fff;
+    padding:35px;
+    border:1px solid #000;
+    min-height:1122px;
+    box-shadow:0 0 10px rgba(0,0,0,.15);
+
+}
+
+
+
+/* CABEÇALHO */
+
+.cabecalho{
+
+    text-align:center;
+
+}
+
+
+.cabecalho img{
+    width:90px;
+    height:90px;
+    margin-bottom:10px;
+}
+
+
+.cabecalho h2{
+
+    margin:2px;
+    font-size:24px;
+
+}
+
+
+.cabecalho h3{
+
+    margin:2px;
+    font-size:18px;
+    font-weight:normal;
+
+}
+
+
+.cabecalho h4{
+
+    margin:2px;
+    font-size:16px;
+    font-weight:normal;
+
+}
+
+
+
+
+/* DADOS ESCOLA */
+
+
+.dados{
+
+    margin-top:30px;
+
+}
+
+
+.linha{
+
+    display:flex;
+    margin-bottom:10px;
+
+}
+
+
+.label{
+
+    width:120px;
+    font-weight:bold;
+
+}
+
+
+.valor{
+
+    flex:1;
+    border-bottom:1px dotted #000;
+    padding-left:8px;
+
+}
+
+
+
+
+
+/* TURMA */
+
+
+.turma{
+
+    display:flex;
+    justify-content:space-between;
+    margin-top:25px;
+    margin-bottom:25px;
+    font-weight:bold;
+
+}
+
+
+
+
+
+/* TITULO */
+
+
+.titulo{
+
+    text-align:center;
+    font-size:20px;
+    margin-bottom:20px;
+    font-weight:bold;
+
+}
+
+
+
+
+
+/* TABELA */
+
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+
+th{
+
+    background:#efefef;
+
+}
+
+
+th,td{
+
+    border:1px solid #000;
+    padding:7px;
+    font-size:14px;
+
+}
+
+
+td{
+
+    text-align:center;
+
+}
+
+
+td.nome{
+
+    text-align:left;
+
+}
+
+
+
+
+
+/* ESTATISTICA */
+
+
+.estatistica{
+
+    margin-top:30px;
+
+}
+
+
+.estatistica table{
+
+    width:300px;
+
+}
+
+
+.estatistica td{
+
+    text-align:left;
+
+}
+
+
+
+
+
+/* ASSINATURA */
+
+
+.assinatura{
+
+    margin-top:80px;
+    text-align:center;
+
+}
+
+
+.assinatura .linha{
+
+    width:300px;
+    border-top:1px solid #000;
+    margin:auto;
+    display:block;
+
+}
+
+
+
+
+
+/* BOTAO */
+
+
+.acoes{
+
+    text-align:center;
+    margin-top:25px;
+
+}
+
+
+button{
+
+    padding:10px 20px;
+    background:#0d6efd;
+    color:white;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+
+}
+
+
+
+
+/* IMPRESSÃO */
+
+
+@media print{
+
+
+body{
+
+    background:white;
+
+}
+
+
+.acoes{
+
+    display:none;
+
+}
+
+
+.folha{
+
+    box-shadow:none;
+    border:none;
+
+}
+
+
+}
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+<div class="container">
+
+
+<div class="folha">
+
+
+
+<!-- ================= CABEÇALHO ================= -->
+
+
+<div class="cabecalho">
+
+    <img src="/static/img/img.png">
+
+    <h2>REPÚBLICA DE MOÇAMBIQUE</h2>
+
+    <h3>Ministério da Educação e Cultura</h3>
+
+    <h3>{{ escola.provincia if escola else "" }}</h3>
+
+    <h3>{{ escola.distrito if escola else "" }}</h3>
+
+    <h4>{{ escola.nome if escola else "" }}</h4>
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ================= TURMA ================= -->
+
+
+
+<div class="turma">
+
+
+<div>
+
+Classe:
+
+<span>
+
+{{ classe.classe if classe else "" }}
+
+</span>
+
+
+</div>
+
+
+
+
+<div>
+
+Turma:
+
+<span>
+
+{{ turma.turma if turma else "" }}
+
+</span>
+
+
+</div>
+
+
+
+
+<div>
+
+Ano:
+
+<span>
+
+{{ ano }}
+
+</span>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<div class="titulo">
+
+LISTA NOMINAL DOS ALUNOS
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ================= LISTA ALUNOS ================= -->
+
+
+<table>
+
+
+<thead>
+
+
+<tr>
+
+<th>
+Nº
+</th>
+
+
+<th>
+Nome Completo
+</th>
+
+
+<th>
+Sexo
+</th>
+
+
+<th>
+Data Nascimento
+</th>
+
+
+<th>
+Estado
+</th>
+
+
+</tr>
+
+
+</thead>
+
+
+
+
+
+<tbody>
+
+
+{% for aluno in alunos %}
+
+
+<tr>
+
+
+<td>
+
+{{ loop.index }}
+
+</td>
+
+
+
+
+<td class="nome">
+
+{{ aluno.nome }}
+
+</td>
+
+
+
+
+<td>
+
+{{ aluno.sexo }}
+
+</td>
+
+
+
+
+<td>
+
+{{ aluno.data_nascimento }}
+
+</td>
+
+
+
+
+<td>
+
+Ativo
+
+</td>
+
+
+
+</tr>
+
+
+
+{% endfor %}
+
+
+
+</tbody>
+
+
+</table>
+
+
+
+
+
+
+
+
+<!-- ================= ESTATISTICA ================= -->
+
+
+<div class="estatistica">
+
+
+<h3>
+
+ESTATÍSTICA
+
+</h3>
+
+
+
+
+<table>
+
+
+
+<tr>
+
+<td>
+
+Homens (H)
+
+</td>
+
+
+<td>
+
+{{ homens }}
+
+</td>
+
+
+</tr>
+
+
+
+
+
+<tr>
+
+<td>
+
+Mulheres (M)
+
+</td>
+
+
+<td>
+
+{{ mulheres }}
+
+</td>
+
+
+</tr>
+
+
+
+
+
+<tr>
+
+<td>
+
+HM
+
+</td>
+
+
+<td>
+
+{{ total }}
+
+</td>
+
+
+</tr>
+
+
+
+</table>
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- ================= ASSINATURA ================= -->
+
+
+
+<div class="assinatura">
+
+    <p><strong>O Director da Turma</strong></p>
+
+    <br><br><br>
+
+    <div class="linha"></div>
+
+    <p>({{ professor.nome if professor else "" }})</p>
+
+</div>
+
+
+
+
+
+
+
+
+<div class="acoes">
+
+
+<button onclick="window.print()">
+
+Imprimir
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+
+    // ==========================
+    // ANO AUTOMÁTICO
+    // ==========================
+
+    const ano = document.getElementById("ano");
+
+    if(ano && ano.innerHTML.trim()===""){
+
+        ano.innerHTML = new Date().getFullYear();
+
+    }
+
+
+
+
+    // ==========================
+    // VERIFICAR LISTA DE ALUNOS
+    // ==========================
+
+    const lista = document.querySelector("#lista");
+
+    if(lista){
+
+        const linhas = lista.querySelectorAll("tr");
+
+
+        if(linhas.length === 0){
+
+            lista.innerHTML = `
+
+            <tr>
+
+            <td colspan="5">
+
+            Nenhum aluno encontrado
+
+            </td>
+
+            </tr>
+
+            `;
+
+        }
+
+    }
+
+
+
+
+    // ==========================
+    // CALCULAR ESTATÍSTICA
+    // (caso seja carregado via API)
+    // ==========================
+
+
+    let homens = 0;
+    let mulheres = 0;
+
+
+
+    document.querySelectorAll("#lista tr").forEach(function(linha){
+
+
+        let sexo = linha.children[2];
+
+
+        if(sexo){
+
+
+            let valor = sexo.textContent
+            .trim()
+            .toUpperCase();
+
+
+
+            if(valor==="M" || valor==="H"){
+
+                homens++;
+
+            }
+
+
+            if(valor==="F"){
+
+                mulheres++;
+
+            }
+
+
+        }
+
+
+    });
+
+
+
+    let campoHomens=document.getElementById("homens");
+    let campoMulheres=document.getElementById("mulheres");
+    let campoTotal=document.getElementById("total");
+
+
+
+    if(campoHomens){
+
+        campoHomens.innerHTML = homens;
+
+    }
+
+
+    if(campoMulheres){
+
+        campoMulheres.innerHTML = mulheres;
+
+    }
+
+
+    if(campoTotal){
+
+        campoTotal.innerHTML = homens + mulheres;
+
+    }
+
+
+
+
+});
+
+
+
+
+
+// ==========================
+// CONFIRMAR IMPRESSÃO
+// ==========================
+
+function imprimirTurma(){
+
+
+    let confirmar = confirm(
+        "Deseja imprimir a lista da turma?"
+    );
+
+
+    if(confirmar){
+
+        window.print();
+
+    }
+
+
+}
+</script>
+
+</body>
+
+
+</html>

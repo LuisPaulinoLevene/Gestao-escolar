@@ -12,19 +12,22 @@ from services.failover_service import status_bancos
 from services.replication_service import replicar_eventos
 from services.audit import registrar_auditoria
 from services.sync_worker import start_sync_worker
+from fastapi.staticfiles import StaticFiles
 
 # Routers API e Pages
 from routers import (
     professor, aluno, classe, turma, matricula, admin, dap,
     director, chefe_secretaria, funcionario_secretaria, usuario_professor,
     dashboard, importar_alunos, sms, encontro, contactos, assistencias,
-    mozesms, encontro_coletivo, outros_encontros,  disciplina
+    mozesms, encontro_coletivo, outros_encontros,  disciplina, distribuicao, escola
 )
 
 from routers.pages import (
     ep_phandira_2, dados_aluno, encontros, contacto, informacoes,
     assistencia, ass_direccao, comprar_creditos,
-    encontros_coletivo, outro_encontro, classes, turmas, disciplinas
+    encontros_coletivo, outro_encontro, classes, turmas, disciplinas, matriculas,
+    alunos_por_turma, escolas, acessos
+
 )
 
 from routers.assistencia_direcao import router as assistencia_direcao_router
@@ -184,6 +187,8 @@ app.include_router(mozesms.router)
 app.include_router(encontro_coletivo.router)
 app.include_router(outros_encontros.router)
 app.include_router(disciplina.router)
+app.include_router(distribuicao.router)
+app.include_router(escola.router)
 
 
 # ==========================
@@ -219,6 +224,14 @@ app.include_router(classes.router)
 app.include_router(turmas.router)
 app.include_router(disciplinas.router)
 app.include_router(encontros_coletivo.router)
+app.include_router(matriculas.router)
+app.include_router(alunos_por_turma.router)
+app.include_router(escolas.router)
+app.include_router(acessos.router)
+
+
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ==========================
 # FIM

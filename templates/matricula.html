@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sistema de Matrículas</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+    padding:30px;
+}
+
+.container{
+    width:95%;
+    max-width:1200px;
+    margin:auto;
+}
+
+.card{
+
+    background:#fff;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
+    padding:20px;
+
+}
+
+h2{
+
+    color:#0d6efd;
+    margin-bottom:20px;
+
+}
+
+.grid{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+
+}
+
+label{
+
+    display:block;
+    margin-bottom:5px;
+    font-weight:bold;
+
+}
+
+input,
+select{
+
+    width:100%;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:15px;
+
+}
+
+input:focus,
+select:focus{
+
+    outline:none;
+    border-color:#0d6efd;
+
+}
+
+button{
+
+    padding:10px 20px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
+
+}
+
+.btn-primary{
+
+    background:#0d6efd;
+    color:white;
+
+}
+
+.btn-primary:hover{
+
+    background:#084298;
+
+}
+
+.btn-success{
+
+    background:#198754;
+    color:white;
+
+}
+
+.btn-success:hover{
+
+    background:#146c43;
+
+}
+
+.btn-danger{
+
+    background:#dc3545;
+    color:white;
+
+}
+
+.btn-danger:hover{
+
+    background:#bb2d3b;
+
+}
+
+.btn-warning{
+
+    background:#ffc107;
+    color:black;
+
+}
+
+.btn-warning:hover{
+
+    background:#e0a800;
+
+}
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+
+}
+
+table thead{
+
+    background:#0d6efd;
+    color:white;
+
+}
+
+table th,
+table td{
+
+    padding:12px;
+    border:1px solid #ddd;
+    text-align:center;
+
+}
+
+table tbody tr:hover{
+
+    background:#f8f9fa;
+
+}
+
+.msg{
+
+    margin-top:15px;
+    padding:12px;
+    border-radius:5px;
+    display:none;
+
+}
+
+.success{
+
+    background:#d1e7dd;
+    color:#0f5132;
+
+}
+
+.error{
+
+    background:#f8d7da;
+    color:#842029;
+
+}
+
+.info{
+
+    background:#cff4fc;
+    color:#055160;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h2>Matrícula de Alunos</h2>
+
+<div class="grid">
+
+<div>
+
+<label>Classe</label>
+
+<select id="classe">
+
+<option value="">Selecione...</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Turma</label>
+
+<select id="turma">
+
+<option value="">Selecione...</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Ano Letivo</label>
+
+<input
+type="number"
+id="ano"
+value="2025">
+
+</div>
+
+</div>
+
+<hr><br>
+
+<div class="grid">
+
+<div>
+
+<label>ID ou Nome do Aluno</label>
+
+<input
+type="text"
+id="pesquisa"
+placeholder="Digite o ID ou Nome">
+
+</div>
+
+<div style="display:flex;align-items:end">
+
+<button
+class="btn-primary"
+id="btnPesquisar">
+
+Pesquisar
+
+</button>
+
+</div>
+
+</div>
+
+<div id="mensagem" class="msg"></div>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Nome</th>
+
+<th>Sexo</th>
+
+<th>Nascimento</th>
+
+<th>Ação</th>
+
+</tr>
+
+</thead>
+
+<tbody id="listaAlunos">
+
+<tr>
+
+<td colspan="5">
+
+Nenhum aluno encontrado
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+/*=====================================
+CONFIGURAÇÃO DA API
+======================================*/
+
+const API = "http://127.0.0.1:8000";
+
+const classe = document.getElementById("classe");
+const turma = document.getElementById("turma");
+const ano = document.getElementById("ano");
+const pesquisa = document.getElementById("pesquisa");
+const lista = document.getElementById("listaAlunos");
+const mensagem = document.getElementById("mensagem");
+
+let alunos = [];
+let classes = [];
+let turmas = [];
+let matriculas = [];
+let resultadoPesquisa = [];
+
+
+/*=====================================
+MENSAGEM
+======================================*/
+
+function mostrarMensagem(texto,tipo){
+
+    mensagem.className="msg "+tipo;
+    mensagem.innerHTML=texto;
+    mensagem.style.display="block";
+
+    setTimeout(()=>{
+
+        mensagem.style.display="none";
+
+    },3000);
+
+}
+
+
+/*=====================================
+CARREGAR CLASSES
+======================================*/
+
+async function carregarClasses(){
+
+    const response = await fetch(`${API}/classes/`);
+
+    classes = await response.json();
+
+    classe.innerHTML='<option value="">Selecione...</option>';
+
+    classes.forEach(c=>{
+
+        classe.innerHTML += `
+        <option value="${c.id}">
+            ${c.classe}
+        </option>
+        `;
+
+    });
+
+}
+
+
+/*=====================================
+CARREGAR TURMAS
+======================================*/
+
+async function carregarTurmas(){
+
+    const response = await fetch(`${API}/turmas/`);
+
+    turmas = await response.json();
+
+}
+
+
+/*=====================================
+FILTRAR TURMAS
+======================================*/
+
+classe.addEventListener("change",()=>{
+
+    turma.innerHTML='<option value="">Selecione...</option>';
+
+    let listaTurmas = turmas.filter(t=>t.classe_id==classe.value);
+
+    listaTurmas.forEach(t=>{
+
+        turma.innerHTML += `
+        <option value="${t.id}">
+            ${t.turma}
+        </option>
+        `;
+
+    });
+
+});
+
+
+/*=====================================
+CARREGAR ALUNOS
+======================================*/
+
+async function carregarAlunos(){
+
+    const response = await fetch(`${API}/alunos/`);
+
+    alunos = await response.json();
+
+}
+
+
+/*=====================================
+CARREGAR MATRICULAS
+======================================*/
+
+async function carregarMatriculas(){
+
+    const response = await fetch(`${API}/matriculas/`);
+
+    matriculas = await response.json();
+
+}
+
+
+/*=====================================
+PESQUISAR
+======================================*/
+
+document.getElementById("btnPesquisar").onclick=function(){
+
+    let texto = pesquisa.value.toLowerCase().trim();
+
+    resultadoPesquisa=[];
+
+    alunos.forEach(aluno=>{
+
+        let matriculado = matriculas.find(m=>
+
+            m.aluno_id==aluno.id &&
+            m.ano_letivo==Number(ano.value)
+
+        );
+
+        if(matriculado)
+            return;
+
+        if(
+
+            aluno.nome.toLowerCase().includes(texto)
+
+            ||
+
+            aluno.id.toString()==texto
+
+        ){
+
+            resultadoPesquisa.push(aluno);
+
+        }
+
+    });
+
+    desenharTabela();
+
+};
+
+
+/*=====================================
+DESENHAR TABELA
+======================================*/
+
+function desenharTabela(){
+
+    lista.innerHTML="";
+
+    if(resultadoPesquisa.length==0){
+
+        lista.innerHTML=`
+        <tr>
+
+            <td colspan="5">
+
+                Nenhum aluno encontrado
+
+            </td>
+
+        </tr>
+        `;
+
+        return;
+
+    }
+
+    resultadoPesquisa.forEach(aluno=>{
+
+        lista.innerHTML +=`
+
+        <tr>
+
+            <td>${aluno.id}</td>
+
+            <td>${aluno.nome}</td>
+
+            <td>${aluno.sexo}</td>
+
+            <td>${aluno.data_nascimento}</td>
+
+            <td>
+
+            <button
+            class="btn-success"
+            onclick="matricular(${aluno.id})">
+
+            Matricular
+
+            </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+
+/*=====================================
+INICIALIZAÇÃO
+======================================*/
+
+/*=====================================
+INICIALIZAÇÃO RÁPIDA
+======================================*/
+
+async function iniciar(){
+
+
+    // carregar alunos imediatamente
+
+    carregarAlunos()
+    .then(()=>{
+
+        resultadoPesquisa = alunos;
+
+        desenharTabela();
+
+    });
+
+
+
+    // carregar o resto em paralelo
+
+    Promise.all([
+
+        carregarClasses(),
+
+        carregarTurmas(),
+
+        carregarMatriculas()
+
+    ]);
+
+
+}
+
+iniciar();
+/*=====================================
+REALIZAR MATRÍCULA
+======================================*/
+
+async function matricular(aluno_id){
+
+    if(!classe.value){
+
+        mostrarMensagem(
+            "Selecione uma classe antes de matricular.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    if(!turma.value){
+
+        mostrarMensagem(
+            "Selecione uma turma antes de matricular.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    let dados = {
+
+        aluno_id: Number(aluno_id),
+
+        classe_id: Number(classe.value),
+
+        turma_id: Number(turma.value),
+
+        ano_letivo: Number(ano.value)
+
+    };
+
+
+    try{
+
+
+        const response = await fetch(
+            `${API}/matriculas/`,
+            {
+
+                method:"POST",
+
+                headers:{
+
+                    "Content-Type":"application/json"
+
+                },
+
+                body:JSON.stringify(dados)
+
+            }
+
+        );
+
+
+        const resultado = await response.json();
+
+
+
+        if(!response.ok){
+
+
+            mostrarMensagem(
+                resultado.detail || "Erro ao matricular aluno",
+                "error"
+            );
+
+
+            return;
+
+        }
+
+
+
+        mostrarMensagem(
+            "Aluno matriculado com sucesso!",
+            "success"
+        );
+
+
+        // atualizar matrículas
+
+        await carregarMatriculas();
+
+
+
+        // remover aluno da lista
+
+        resultadoPesquisa =
+        resultadoPesquisa.filter(a=>a.id!=aluno_id);
+
+
+
+        desenharTabela();
+
+
+
+    }
+    catch(error){
+
+
+        mostrarMensagem(
+            "Erro de comunicação com o servidor.",
+            "error"
+        );
+
+
+        console.error(error);
+
+
+    }
+
+}
+
+
+
+/*=====================================
+PESQUISA AUTOMÁTICA AO DIGITAR
+======================================*/
+
+pesquisa.addEventListener("input",()=>{
+
+    let texto = pesquisa.value
+        .toLowerCase()
+        .trim();
+
+
+    resultadoPesquisa = [];
+
+
+    alunos.forEach(aluno=>{
+
+
+        // remover alunos já matriculados
+        let matriculado = matriculas.find(m=>
+
+            m.aluno_id == aluno.id &&
+            m.ano_letivo == Number(ano.value)
+
+        );
+
+
+        if(matriculado){
+            return;
+        }
+
+
+
+        // se campo vazio mostra todos
+        if(texto === ""){
+
+
+            resultadoPesquisa.push(aluno);
+
+
+            return;
+
+        }
+
+
+
+        // filtrar por nome ou ID
+
+        if(
+
+            aluno.nome
+            .toLowerCase()
+            .includes(texto)
+
+            ||
+
+            aluno.id
+            .toString()
+            .includes(texto)
+
+        ){
+
+
+            resultadoPesquisa.push(aluno);
+
+
+        }
+
+
+
+    });
+
+
+
+    desenharTabela();
+
+
+});
+</script>
+
+</body>
+</html>

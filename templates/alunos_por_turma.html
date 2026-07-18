@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Distribuição de Turmas</title>
+
+
+<style>
+
+*{
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+
+body{
+
+    background:#f4f6f9;
+    padding:30px;
+
+}
+
+
+
+.container{
+
+    max-width:1200px;
+    margin:auto;
+
+}
+
+
+
+.card{
+
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 5px 15px #ccc;
+
+}
+
+
+
+h2,
+h3{
+
+    color:#0d6efd;
+
+}
+
+
+
+.grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(auto-fit,minmax(250px,1fr));
+
+    gap:15px;
+
+}
+
+
+
+label{
+
+    font-weight:bold;
+
+    display:block;
+
+    margin-bottom:5px;
+
+}
+
+
+
+select,
+input{
+
+    width:100%;
+
+    padding:10px;
+
+    border:1px solid #ccc;
+
+    border-radius:5px;
+
+}
+
+
+
+button{
+
+    padding:10px 20px;
+
+    background:#0d6efd;
+
+    color:white;
+
+    border:none;
+
+    border-radius:5px;
+
+    cursor:pointer;
+
+}
+
+
+
+button:hover{
+
+    background:#084298;
+
+}
+
+
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:25px;
+
+}
+
+
+
+th{
+
+    background:#0d6efd;
+
+    color:white;
+
+}
+
+
+
+th,
+td{
+
+    border:1px solid #ddd;
+
+    padding:10px;
+
+    text-align:center;
+
+}
+
+
+
+.info{
+
+    margin-top:15px;
+
+    background:#cff4fc;
+
+    padding:12px;
+
+    border-radius:5px;
+
+}
+
+
+
+.professor-box{
+
+    margin-top:25px;
+
+    padding:20px;
+
+    background:#f8f9fa;
+
+    border:1px solid #ddd;
+
+    border-radius:8px;
+
+}
+
+
+
+.sucesso{
+
+    background:#d1e7dd;
+
+    color:#0f5132;
+
+}
+
+
+
+.erro{
+
+    background:#f8d7da;
+
+    color:#842029;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="container">
+
+
+
+<div class="card">
+
+
+
+<h2>
+Distribuição de Turmas
+</h2>
+
+
+
+<br>
+
+
+
+<div class="grid">
+
+
+
+<div>
+
+<label>
+Classe
+</label>
+
+
+<select id="classe">
+
+
+<option value="">
+Selecione a classe
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+
+<div>
+
+<label>
+Turma
+</label>
+
+
+<select id="turma">
+
+
+<option value="">
+Selecione a turma
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+
+<div>
+
+<label>
+Ano Letivo
+</label>
+
+
+<input
+type="number"
+id="ano"
+value="2025">
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+
+<br>
+
+
+
+<button onclick="listarAlunos()">
+
+Mostrar Alunos
+
+</button>
+
+
+
+
+
+<!-- MENSAGEM DO SISTEMA -->
+
+
+<div
+id="mensagem"
+class="info"
+style="display:none;">
+
+</div>
+
+
+
+
+
+<!-- LISTA DOS ALUNOS -->
+
+
+<table>
+
+
+
+<thead>
+
+
+<tr>
+
+<th>ID</th>
+
+<th>Aluno</th>
+
+<th>Sexo</th>
+
+<th>Nascimento</th>
+
+<th>Classe</th>
+
+<th>Turma</th>
+
+<th>Ano</th>
+
+<th>Status</th>
+
+
+</tr>
+
+
+
+</thead>
+
+
+
+<tbody id="lista">
+
+
+</tbody>
+
+
+
+</table>
+
+
+
+
+
+<!-- ESTATÍSTICA -->
+
+
+<div
+id="estatistica"
+class="info">
+
+</div>
+
+
+
+
+
+
+
+<!-- DISTRIBUIÇÃO -->
+
+
+<div
+id="professorBox"
+class="professor-box"
+style="display:none;">
+
+
+
+<h3>
+Professor Responsável pela Turma
+</h3>
+
+
+
+<label>
+Professor
+</label>
+
+
+
+<select id="professor">
+
+
+<option value="">
+Selecione o professor
+</option>
+
+
+
+</select>
+
+
+
+
+<br><br>
+
+
+
+
+<button
+id="btnDistribuir"
+onclick="guardarProfessor()">
+
+
+Atribuir Professor
+
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+</div>
+
+
+
+</div>
+
+<script>
+
+const API = "http://127.0.0.1:8000";
+
+let classes = [];
+let turmas = [];
+let professores = [];
+let distribuicaoId = null;
+
+const classe = document.getElementById("classe");
+const turma = document.getElementById("turma");
+const tabela = document.getElementById("lista");
+const professor = document.getElementById("professor");
+const mensagem = document.getElementById("mensagem");
+
+
+// ======================================
+// MOSTRAR MENSAGEM
+// ======================================
+
+function mostrarMensagem(texto, tipo = "sucesso") {
+
+    mensagem.style.display = "block";
+    mensagem.innerHTML = texto;
+
+    mensagem.className = "info";
+
+    if (tipo == "sucesso") {
+        mensagem.classList.add("sucesso");
+    }
+
+    if (tipo == "erro") {
+        mensagem.classList.add("erro");
+    }
+
+    setTimeout(() => {
+        mensagem.style.display = "none";
+    }, 4000);
+
+}
+
+
+
+// ======================================
+// CARREGAR CLASSES
+// ======================================
+
+async function carregarClasses() {
+
+    let res = await fetch(`${API}/classes/`);
+
+    classes = await res.json();
+
+    classe.innerHTML = `
+        <option value="">
+            Selecione a classe
+        </option>
+    `;
+
+    classes.forEach(c => {
+
+        classe.innerHTML += `
+            <option value="${c.id}">
+                ${c.classe}
+            </option>
+        `;
+
+    });
+
+}
+
+
+
+// ======================================
+// CARREGAR TURMAS
+// ======================================
+
+async function carregarTurmas() {
+
+    let res = await fetch(`${API}/turmas/`);
+
+    turmas = await res.json();
+
+}
+
+
+
+// ======================================
+// CARREGAR PROFESSORES
+// ======================================
+
+async function carregarProfessores() {
+
+    let res = await fetch(`${API}/professores/`);
+
+    professores = await res.json();
+
+    professor.innerHTML = `
+        <option value="">
+            Selecione o professor
+        </option>
+    `;
+
+    professores.forEach(p => {
+
+        professor.innerHTML += `
+            <option value="${p.id}">
+                ${p.nome}
+            </option>
+        `;
+
+    });
+
+}
+
+
+
+// ======================================
+// QUANDO MUDA A CLASSE
+// ======================================
+
+classe.addEventListener("change", () => {
+
+    turma.innerHTML = `
+        <option value="">
+            Selecione a turma
+        </option>
+    `;
+
+    turmas
+        .filter(t => t.classe_id == classe.value)
+        .forEach(t => {
+
+            turma.innerHTML += `
+                <option value="${t.id}">
+                    ${t.turma}
+                </option>
+            `;
+
+        });
+
+});
+
+
+
+// ======================================
+// INICIAR SISTEMA
+// ======================================
+
+async function iniciar() {
+
+    await carregarClasses();
+
+    await carregarTurmas();
+
+    await carregarProfessores();
+
+}
+
+iniciar();
+
+// ======================================
+// LISTAR ALUNOS DA TURMA
+// ======================================
+
+async function listarAlunos(){
+
+    tabela.innerHTML = "";
+
+    document.getElementById("estatistica").innerHTML = "";
+
+    document.getElementById("professorBox").style.display = "none";
+
+
+
+    if(!classe.value){
+
+        mostrarMensagem(
+            "Selecione a classe.",
+            "erro"
+        );
+
+        return;
+
+    }
+
+
+
+    if(!turma.value){
+
+        mostrarMensagem(
+            "Selecione a turma.",
+            "erro"
+        );
+
+        return;
+
+    }
+
+
+
+    let anoLetivo =
+    Number(
+        document.getElementById("ano").value
+    );
+
+
+
+    if(!anoLetivo){
+
+        mostrarMensagem(
+            "Informe o ano letivo.",
+            "erro"
+        );
+
+        return;
+
+    }
+
+
+
+    try{
+
+        let resposta =
+        await fetch(`${API}/matriculas/`);
+
+        let matriculas =
+        await resposta.json();
+
+
+
+        let lista =
+
+        matriculas.filter(m =>
+
+            m.classe_id == Number(classe.value)
+
+            &&
+
+            m.turma_id == Number(turma.value)
+
+            &&
+
+            m.ano_letivo == anoLetivo
+
+        );
+
+
+
+
+        if(lista.length==0){
+
+            tabela.innerHTML = `
+
+            <tr>
+
+                <td colspan="8">
+
+                    Nenhum aluno encontrado.
+
+                </td>
+
+            </tr>
+
+            `;
+
+            mostrarMensagem(
+                "Nenhum aluno encontrado para esta turma.",
+                "erro"
+            );
+
+            return;
+
+        }
+
+
+
+
+        let totalH = 0;
+
+        let totalM = 0;
+
+
+
+
+        lista.forEach(m=>{
+
+
+            if(
+
+                m.sexo=="H"
+
+                ||
+
+                m.sexo=="Masculino"
+
+            ){
+
+                totalH++;
+
+            }
+
+
+
+            if(
+
+                m.sexo=="M"
+
+                ||
+
+                m.sexo=="Feminino"
+
+            ){
+
+                totalM++;
+
+            }
+
+
+
+            tabela.innerHTML += `
+
+            <tr>
+
+                <td>${m.aluno_id}</td>
+
+                <td>${m.aluno_nome}</td>
+
+                <td>${m.sexo}</td>
+
+                <td>${m.data_nascimento}</td>
+
+                <td>${m.classe_nome}</td>
+
+                <td>${m.turma_nome}</td>
+
+                <td>${m.ano_letivo}</td>
+
+                <td>${m.status}</td>
+
+            </tr>
+
+            `;
+
+
+        });
+
+
+
+
+        document.getElementById("estatistica").innerHTML = `
+
+            <h3>Estatística da Turma</h3>
+
+            <b>Homens:</b> ${totalH}
+
+            <br><br>
+
+            <b>Mulheres:</b> ${totalM}
+
+            <br><br>
+
+            <b>Total:</b> ${totalH+totalM}
+
+        `;
+
+
+
+
+        document.getElementById(
+            "professorBox"
+        ).style.display = "block";
+
+
+
+        await verificarDistribuicao();
+
+
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        mostrarMensagem(
+
+            "Erro ao carregar alunos.",
+
+            "erro"
+
+        );
+
+    }
+
+}
+
+// ======================================
+// VERIFICAR DISTRIBUIÇÃO
+// ======================================
+
+async function verificarDistribuicao(){
+
+    distribuicaoId = null;
+
+    professor.value = "";
+
+    let ano =
+    Number(
+        document.getElementById("ano").value
+    );
+
+    try{
+
+        let resposta = await fetch(
+
+            `${API}/distribuicoes/verificar/?classe_id=${classe.value}&turma_id=${turma.value}&ano_letivo=${ano}`
+
+        );
+
+        if(!resposta.ok){
+
+            return;
+
+        }
+
+        let dados = await resposta.json();
+
+        if(dados.existe){
+
+            distribuicaoId = dados.id;
+
+            professor.value = dados.professor_id;
+
+            document.getElementById("btnDistribuir").innerHTML =
+            "Actualizar Professor";
+
+        }
+
+        else{
+
+            document.getElementById("btnDistribuir").innerHTML =
+            "Atribuir Professor";
+
+        }
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+    }
+
+}
+
+
+
+// ======================================
+// GUARDAR / ACTUALIZAR PROFESSOR
+// ======================================
+
+async function guardarProfessor(){
+
+    if(!professor.value){
+
+        mostrarMensagem(
+            "Selecione um professor.",
+            "erro"
+        );
+
+        return;
+
+    }
+
+
+    let dados={
+
+        professor_id:Number(professor.value),
+
+        classe_id:Number(classe.value),
+
+        turma_id:Number(turma.value),
+
+        ano_letivo:Number(
+            document.getElementById("ano").value
+        )
+
+    };
+
+
+    let url;
+
+    let metodo;
+
+
+    if(distribuicaoId){
+
+        url =
+        `${API}/distribuicoes/${distribuicaoId}`;
+
+        metodo = "PUT";
+
+    }
+
+    else{
+
+        url =
+        `${API}/distribuicoes/`;
+
+        metodo = "POST";
+
+    }
+
+
+    try{
+
+        let resposta = await fetch(url,{
+
+            method:metodo,
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify(dados)
+
+        });
+
+
+        let resultado = await resposta.json();
+
+
+        if(resposta.ok){
+
+            mostrarMensagem(
+
+                distribuicaoId ?
+
+                "Professor actualizado com sucesso."
+
+                :
+
+                "Professor atribuído com sucesso.",
+
+                "sucesso"
+
+            );
+
+            await verificarDistribuicao();
+
+        }
+
+        else{
+
+            mostrarMensagem(
+
+                resultado.detail ||
+
+                "Erro ao guardar.",
+
+                "erro"
+
+            );
+
+        }
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        mostrarMensagem(
+
+            "Erro de ligação com o servidor.",
+
+            "erro"
+
+        );
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

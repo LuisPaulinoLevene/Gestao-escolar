@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Usuários dos Professores</title>
+
+<style>
+
+*{
+
+    box-sizing:border-box;
+    font-family:Arial;
+
+}
+
+
+body{
+
+    margin:0;
+    padding:30px;
+    background:#f4f6f9;
+
+}
+
+
+
+.container{
+
+    max-width:1100px;
+    margin:auto;
+
+}
+
+
+
+.card{
+
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+
+}
+
+
+
+h2{
+
+    color:#0d6efd;
+    margin-top:0;
+
+}
+
+
+
+.grid{
+
+    display:grid;
+
+    grid-template-columns:
+
+    repeat(auto-fit,minmax(250px,1fr));
+
+    gap:15px;
+
+}
+
+
+
+label{
+
+    font-weight:bold;
+    display:block;
+    margin-bottom:5px;
+
+}
+
+
+
+select,
+input{
+
+    width:100%;
+
+    padding:10px;
+
+    border:1px solid #ccc;
+
+    border-radius:5px;
+
+}
+
+
+
+button{
+
+    padding:10px 20px;
+
+    border:none;
+
+    border-radius:5px;
+
+    cursor:pointer;
+
+    color:white;
+
+    font-size:15px;
+
+}
+
+
+
+.salvar{
+
+    background:#198754;
+
+}
+
+
+
+.novo{
+
+    background:#0d6efd;
+
+}
+
+
+
+.editar{
+
+    background:#ffc107;
+    color:black;
+
+}
+
+
+
+.apagar{
+
+    background:#dc3545;
+
+}
+
+
+
+button:hover{
+
+    opacity:.9;
+
+}
+
+
+
+table{
+
+    width:100%;
+
+    margin-top:25px;
+
+    border-collapse:collapse;
+
+}
+
+
+
+th{
+
+    background:#0d6efd;
+
+    color:white;
+
+}
+
+
+
+th,
+td{
+
+    border:1px solid #ddd;
+
+    padding:10px;
+
+    text-align:center;
+
+}
+
+
+
+.info{
+
+    display:none;
+
+    margin-top:20px;
+
+    padding:12px;
+
+    border-radius:5px;
+
+}
+
+
+
+.sucesso{
+
+    background:#d1e7dd;
+
+    color:#0f5132;
+
+}
+
+
+
+.erro{
+
+    background:#f8d7da;
+
+    color:#842029;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h2>
+
+Usuários dos Professores
+
+</h2>
+
+
+<div class="grid">
+
+
+<div>
+
+<label>
+
+Professor
+
+</label>
+
+<select id="professor">
+
+<option value="">
+
+Selecione o professor
+
+</option>
+
+</select>
+
+</div>
+
+
+
+<div>
+
+<label>
+
+Senha
+
+</label>
+
+<input
+
+type="password"
+
+id="senha"
+
+placeholder="Digite a senha"
+
+>
+
+</div>
+
+
+</div>
+
+
+<br>
+
+
+<button
+
+class="salvar"
+
+id="btnSalvar"
+
+onclick="salvarUsuario()"
+
+>
+
+Guardar
+
+</button>
+
+
+<button
+
+class="novo"
+
+onclick="novo()"
+
+>
+
+Novo
+
+</button>
+
+
+
+<div
+
+id="mensagem"
+
+class="info"
+
+>
+
+</div>
+
+
+
+<table>
+
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+
+<th>Professor</th>
+
+<th>Senha</th>
+
+<th>Ações</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="lista">
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+</div>
+<script>
+
+const API="http://127.0.0.1:8000";
+
+let usuarioId=null;
+
+const professor=document.getElementById("professor");
+const senha=document.getElementById("senha");
+const tabela=document.getElementById("lista");
+const mensagem=document.getElementById("mensagem");
+
+
+
+// =====================================
+// MENSAGENS
+// =====================================
+
+function mostrarMensagem(texto,tipo="sucesso"){
+
+    mensagem.style.display="block";
+
+    mensagem.className="info";
+
+    mensagem.classList.add(tipo);
+
+    mensagem.innerHTML=texto;
+
+    setTimeout(()=>{
+
+        mensagem.style.display="none";
+
+    },3000);
+
+}
+
+
+
+// =====================================
+// CARREGAR PROFESSORES
+// =====================================
+
+async function carregarProfessores(){
+
+    professor.innerHTML=`
+
+        <option value="">
+
+        Selecione o professor
+
+        </option>
+
+    `;
+
+    let resposta=
+    await fetch(`${API}/professores/`);
+
+    let dados=
+    await resposta.json();
+
+    dados.forEach(p=>{
+
+        professor.innerHTML+=`
+
+        <option value="${p.id}">
+
+            ${p.nome}
+
+        </option>
+
+        `;
+
+    });
+
+}
+
+
+
+// =====================================
+// LISTAR USUÁRIOS
+// =====================================
+
+async function listarUsuarios(){
+
+    tabela.innerHTML="";
+
+    let resposta=
+    await fetch(`${API}/usuarios-professores/`);
+
+    let usuarios=
+    await resposta.json();
+
+    usuarios.forEach(u=>{
+
+        tabela.innerHTML+=`
+
+        <tr>
+
+            <td>${u.id}</td>
+
+            <td>${u.nome}</td>
+
+            <td>${u.senha}</td>
+
+            <td>
+
+                <button
+
+                class="editar"
+
+                onclick="editar(${u.id})">
+
+                Editar
+
+                </button>
+
+                <button
+
+                class="apagar"
+
+                onclick="apagar(${u.id})">
+
+                Apagar
+
+                </button>
+
+            </td>
+
+        </tr>
+
+        `;
+
+    });
+
+}
+
+
+
+// =====================================
+// NOVO
+// =====================================
+
+function novo(){
+
+    usuarioId=null;
+
+    professor.value="";
+
+    senha.value="";
+
+    document.getElementById("btnSalvar").innerHTML="Guardar";
+
+}
+
+
+
+// =====================================
+// GUARDAR
+// =====================================
+
+async function salvarUsuario(){
+
+    if(!professor.value){
+
+        mostrarMensagem(
+
+            "Selecione o professor",
+
+            "erro"
+
+        );
+
+        return;
+
+    }
+
+
+    if(senha.value==""){
+
+        mostrarMensagem(
+
+            "Informe a senha",
+
+            "erro"
+
+        );
+
+        return;
+
+    }
+
+
+    let dados={
+
+        professor_id:Number(professor.value),
+
+        senha:senha.value
+
+    };
+
+
+    let url;
+
+    let metodo;
+
+
+    if(usuarioId==null){
+
+        url=`${API}/usuarios-professores/`;
+
+        metodo="POST";
+
+    }
+
+    else{
+
+        url=`${API}/usuarios-professores/${usuarioId}`;
+
+        metodo="PUT";
+
+    }
+
+
+    let resposta=await fetch(url,{
+
+        method:metodo,
+
+        headers:{
+
+            "Content-Type":"application/json"
+
+        },
+
+        body:JSON.stringify(dados)
+
+    });
+
+
+    let resultado=await resposta.json();
+
+
+    if(resposta.ok){
+
+        mostrarMensagem(
+
+            usuarioId?
+
+            "Utilizador actualizado."
+
+            :
+
+            "Utilizador criado.",
+
+            "sucesso"
+
+        );
+
+        novo();
+
+        listarUsuarios();
+
+    }
+
+    else{
+
+        mostrarMensagem(
+
+            resultado.detail,
+
+            "erro"
+
+        );
+
+    }
+
+}
+
+  // =====================================
+// EDITAR
+// =====================================
+
+async function editar(id){
+
+    let resposta =
+    await fetch(
+
+        `${API}/usuarios-professores/${id}`
+
+    );
+
+    let usuario =
+    await resposta.json();
+
+
+    usuarioId = usuario.id;
+
+
+    professor.value =
+    usuario.professor_id;
+
+
+    senha.value =
+    usuario.senha;
+
+
+    document.getElementById(
+        "btnSalvar"
+    ).innerHTML =
+    "Actualizar";
+
+}
+
+
+
+// =====================================
+// APAGAR
+// =====================================
+
+async function apagar(id){
+
+    if(!confirm(
+        "Deseja remover este utilizador?"
+    )){
+
+        return;
+
+    }
+
+
+    let resposta =
+    await fetch(
+
+        `${API}/usuarios-professores/${id}`,
+
+        {
+
+            method:"DELETE"
+
+        }
+
+    );
+
+
+    let resultado =
+    await resposta.json();
+
+
+    if(resposta.ok){
+
+        mostrarMensagem(
+
+            resultado.message,
+
+            "sucesso"
+
+        );
+
+        listarUsuarios();
+
+    }
+
+    else{
+
+        mostrarMensagem(
+
+            resultado.detail,
+
+            "erro"
+
+        );
+
+    }
+
+}
+
+
+
+// =====================================
+// INICIAR
+// =====================================
+
+async function iniciar(){
+
+    await carregarProfessores();
+
+    await listarUsuarios();
+
+}
+
+iniciar();
+</script>
+</body>
+</html>

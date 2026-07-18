@@ -59,20 +59,39 @@ body{display:flex;background:#f1f5f9;}
 }
 
 .menu a{
-    width:50px;
-    height:50px;
+    width:75px;
+    height:75px;
     display:flex;
     align-items:center;
     justify-content:center;
-    border-radius:10px;
-    background:rgba(255,255,255,0.1);
+    border-radius:50%;
+    background:rgba(255,255,255,0.15);
     color:white;
-    font-size:20px;
+    font-size:22px;
     cursor:pointer;
+    position:relative;
+    margin-bottom:25px;
+    transition:.3s;
 }
 
 .menu a:hover{
-    background:rgba(255,255,255,0.25);
+    background:rgba(255,255,255,0.35);
+    transform:scale(1.08);
+}
+
+/* TEXTO CIRCULANDO O ÍCONE */
+.menu a::after{
+    content:attr(data-info);
+    position:absolute;
+    bottom:-25px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:10px;
+    color:white;
+    text-align:center;
+    width:90px;
+    line-height:12px;
+    font-weight:bold;
 }
 
 .recarregar-btn{
@@ -151,19 +170,121 @@ body{display:flex;background:#f1f5f9;}
     <div class="logo">🏫</div>
 
     <div class="menu">
-        <a onmouseover="mostrarInfo('Gerenciar alunos')" onmouseout="resetInfo()" onclick="verificarESeguirei(abrirDadosAluno)"><i class="fas fa-user-graduate"></i></a>
-        <a onmouseover="mostrarInfo('Gerenciar Classes')" onmouseout="resetInfo()" onclick="verificarESeguirei(abrirClasses)"><i class="fas fa-layer-group"></i></a>
-        <a onmouseover="mostrarInfo('Gerenciar Disciplinas')" onmouseout="resetInfo()" onclick="verificarESeguirei(abrirDisciplinas)"><i class="fas fa-book"></i></a>
-        <a onmouseover="mostrarInfo('Gerenciar Turmas')" onmouseout="resetInfo()" onclick="verificarESeguirei(abrirTurmas)"><i class="fas fa-users"></i></a>
-        <a onmouseover="mostrarInfo('Contactos SMS')" onmouseout="resetInfo()" onclick="verificarESeguirei(criarContacto)"><i class="fas fa-address-book"></i></a>
-        <a onmouseover="mostrarInfo('Agendar encontros')" onmouseout="resetInfo()" onclick="verificarESeguirei(agendarEncontros)"><i class="fas fa-calendar"></i></a>
-        <a onmouseover="mostrarInfo('Encontros direcção')" onmouseout="resetInfo()" onclick="verificarESeguirei(agendarEncontros_coletivo)"><i class="fas fa-calendar-check"></i></a>
-        <a onmouseover="mostrarInfo('Outros encontros')" onmouseout="resetInfo()" onclick="verificarESeguirei(agendarOutros_encontros)"><i class="fas fa-calendar-plus"></i></a>
-        <a onmouseover="mostrarInfo('Enviar informações')" onmouseout="resetInfo()" onclick="verificarESeguirei(criarInformacoes)"><i class="fas fa-envelope"></i></a>
-        <a onmouseover="mostrarInfo('Assistências mútuas')" onmouseout="resetInfo()" onclick="verificarESeguirei(criarAssistencias)"><i class="fas fa-hands-helping"></i></a>
-        <a onmouseover="mostrarInfo('Assistências direcção')" onmouseout="resetInfo()" onclick="verificarESeguirei(criarAss_direccao)"><i class="fas fa-user-tie"></i></a>
-        <a class="recarregar-btn" onmouseover="mostrarInfo('Recarregar SMS')" onmouseout="resetInfo()" onclick="verificarESeguirei(recarregarSMS)"><i class="fas fa-credit-card"></i></a>
-    </div>
+    <a data-info="Recarregar SMS"
+       class="recarregar-btn"
+       onmouseover="mostrarInfo('Recarregar SMS')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(recarregarSMS)">
+        <i class="fas fa-credit-card"></i>
+    </a>
+
+    <a data-info="Alunos"
+       onmouseover="mostrarInfo('Gerenciar alunos')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(abrirDadosAluno)">
+        <i class="fas fa-user-graduate"></i>
+    </a>
+
+    <a data-info="Classes"
+       onmouseover="mostrarInfo('Gerenciar Classes')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(abrirClasses)">
+        <i class="fas fa-layer-group"></i>
+    </a>
+
+    <a data-info="Disciplinas"
+       onmouseover="mostrarInfo('Gerenciar Disciplinas')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(abrirDisciplinas)">
+        <i class="fas fa-book"></i>
+    </a>
+
+    <a data-info="Turmas"
+       onmouseover="mostrarInfo('Gerenciar Turmas')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(abrirTurmas)">
+        <i class="fas fa-users"></i>
+    </a>
+
+    <a data-info="Contactos SMS"
+       onmouseover="mostrarInfo('Contactos SMS')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(criarContacto)">
+        <i class="fas fa-address-book"></i>
+    </a>
+
+    <a data-info="Encontros"
+       onmouseover="mostrarInfo('Agendar encontros')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(agendarEncontros)">
+        <i class="fas fa-calendar"></i>
+    </a>
+
+    <a data-info="Direcção"
+       onmouseover="mostrarInfo('Encontros direcção')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(agendarEncontros_coletivo)">
+        <i class="fas fa-calendar-check"></i>
+    </a>
+
+    <a data-info="Outros"
+       onmouseover="mostrarInfo('Outros encontros')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(agendarOutros_encontros)">
+        <i class="fas fa-calendar-plus"></i>
+    </a>
+
+    <a data-info="Informações"
+       onmouseover="mostrarInfo('Enviar informações')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(criarInformacoes)">
+        <i class="fas fa-envelope"></i>
+    </a>
+
+    <a data-info="Assistências"
+       onmouseover="mostrarInfo('Assistências mútuas')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(criarAssistencias)">
+        <i class="fas fa-hands-helping"></i>
+    </a>
+
+    <a data-info="Assist. Direcção"
+       onmouseover="mostrarInfo('Assistências direcção')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(criarAss_direccao)">
+        <i class="fas fa-user-tie"></i>
+    </a>
+
+
+    <a data-info="Matrículas"
+       onmouseover="mostrarInfo('Gerenciar Matrículas')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(abrirMatriculas)">
+        <i class="fas fa-file-signature"></i>
+    </a>
+
+    <a data-info="Alunos/Turma"
+       onmouseover="mostrarInfo('Alunos por Turma')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(abrirAlunosPorTurma)">
+        <i class="fas fa-user-group"></i>
+    </a>
+
+    <a data-info="Escolas"
+       onmouseover="mostrarInfo('Gerenciar Escolas')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(abrirEscolas)">
+        <i class="fas fa-school"></i>
+    </a>
+
+    <a data-info="Acessos"
+       onmouseover="mostrarInfo('Gerenciar Acessos')"
+       onmouseout="resetInfo()"
+       onclick="verificarESeguirei(abrirAcessos)">
+        <i class="fas fa-user-lock"></i>
+    </a>
+
+</div>
 </div>
 
 <div class="main">
@@ -244,6 +365,12 @@ function abrirDadosAluno() { window.location.href = "/dados_aluno"; }
 function abrirClasses() { window.location.href = "/classes"; }
 function abrirDisciplinas() { window.location.href = "/disciplinas"; }
 function abrirTurmas() { window.location.href = "/turmas"; }
+
+function abrirMatriculas() { window.location.href = "/matriculas"; }
+function abrirAlunosPorTurma() { window.location.href = "/alunos_por_turma"; }
+function abrirEscolas() { window.location.href = "/escolas"; }
+function abrirAcessos() { window.location.href = "/acessos"; }
+
 function agendarEncontros() { window.location.href = "/encontros"; }
 function agendarEncontros_coletivo() { window.location.href = "/encontros_coletivo"; }
 function agendarOutros_encontros() { window.location.href = "/outro_encontro"; }

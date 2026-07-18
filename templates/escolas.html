@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Cadastro de Escolas</title>
+
+<style>
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f4f4;
+    margin:30px;
+}
+
+.container{
+    width:900px;
+    margin:auto;
+    background:white;
+    padding:20px;
+    border-radius:8px;
+    box-shadow:0 0 10px rgba(0,0,0,.2);
+}
+
+h2{
+    text-align:center;
+}
+
+input{
+    width:100%;
+    padding:8px;
+    margin-bottom:10px;
+}
+
+button{
+    padding:8px 18px;
+    cursor:pointer;
+    margin-right:5px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th,td{
+    border:1px solid #ccc;
+    padding:8px;
+    text-align:center;
+}
+
+th{
+    background:#0d6efd;
+    color:white;
+}
+
+.editar{
+    background:orange;
+    color:white;
+    border:none;
+}
+
+.apagar{
+    background:red;
+    color:white;
+    border:none;
+}
+
+.salvar{
+    background:green;
+    color:white;
+    border:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Cadastro de Escolas</h2>
+
+<input type="hidden" id="id">
+
+<label>Província</label>
+<input id="provincia">
+
+<label>Distrito</label>
+<input id="distrito">
+
+<label>Nome da Escola</label>
+<input id="nome">
+
+<button class="salvar" onclick="salvar()">
+Salvar
+</button>
+
+<button onclick="limpar()">
+Novo
+</button>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+<th>Província</th>
+<th>Distrito</th>
+<th>Escola</th>
+<th>Ações</th>
+
+</tr>
+
+</thead>
+
+<tbody id="tabela">
+
+</tbody>
+
+</table>
+
+</div>
+
+<script>
+
+const API="/escolas";
+
+listar();
+
+async function listar(){
+
+    const resposta=await fetch(API+"/");
+
+    const dados=await resposta.json();
+
+    let html="";
+
+    dados.forEach(e=>{
+
+        html+=`
+
+        <tr>
+
+        <td>${e.id}</td>
+
+        <td>${e.provincia}</td>
+
+        <td>${e.distrito}</td>
+
+        <td>${e.nome}</td>
+
+        <td>
+
+        <button class="editar"
+        onclick="editar(${e.id},
+        '${e.provincia}',
+        '${e.distrito}',
+        '${e.nome}')">
+
+        Editar
+
+        </button>
+
+        <button class="apagar"
+        onclick="apagar(${e.id})">
+
+        Apagar
+
+        </button>
+
+        </td>
+
+        </tr>
+
+        `;
+
+    });
+
+    document.getElementById("tabela").innerHTML=html;
+
+}
+
+function editar(id,provincia,distrito,nome){
+
+    document.getElementById("id").value=id;
+
+    document.getElementById("provincia").value=provincia;
+
+    document.getElementById("distrito").value=distrito;
+
+    document.getElementById("nome").value=nome;
+
+}
+
+function limpar(){
+
+    document.getElementById("id").value="";
+
+    document.getElementById("provincia").value="";
+
+    document.getElementById("distrito").value="";
+
+    document.getElementById("nome").value="";
+
+}
+
+async function salvar(){
+
+    const id=document.getElementById("id").value;
+
+    const dados={
+
+        provincia:document.getElementById("provincia").value,
+
+        distrito:document.getElementById("distrito").value,
+
+        nome:document.getElementById("nome").value
+
+    };
+
+    if(id==""){
+
+        await fetch(API+"/",{
+
+            method:"POST",
+
+            headers:{
+
+                "Content-Type":"application/json"
+
+            },
+
+            body:JSON.stringify(dados)
+
+        });
+
+    }else{
+
+        await fetch(API+"/"+id,{
+
+            method:"PUT",
+
+            headers:{
+
+                "Content-Type":"application/json"
+
+            },
+
+            body:JSON.stringify(dados)
+
+        });
+
+    }
+
+    limpar();
+
+    listar();
+
+}
+
+async function apagar(id){
+
+    if(!confirm("Deseja apagar esta escola?")){
+
+        return;
+
+    }
+
+    await fetch(API+"/"+id,{
+
+        method:"DELETE"
+
+    });
+
+    listar();
+
+}
+
+</script>
+
+</body>
+</html>
