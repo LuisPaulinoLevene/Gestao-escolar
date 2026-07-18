@@ -162,3 +162,5 @@ async def apagar_disciplina(disciplina_id: int, db: AsyncSession = Depends(get_d
     await db.commit()
 
     return {"message": "Removida com sucesso"}
+
+

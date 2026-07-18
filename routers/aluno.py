@@ -56,24 +56,31 @@ async def get_alunos(db: AsyncSession = Depends(get_db)):
     return result.scalars().all()
 
 
+from sqlalchemy import or_
+
 # ==============================
-# BUSCAR ALUNO POR ID
+# PESQUISAR ALUNO POR ID OU NOME
 # ==============================
-@router.get("/{aluno_id}", response_model=Aluno)
-async def get_aluno(
-    aluno_id: int = Path(..., gt=0),
-    db: AsyncSession = Depends(get_db)
-):
-    result = await db.execute(
-        select(AlunoModel).where(AlunoModel.id == aluno_id)
-    )
+@router.get("/buscar/{valor}")
+async def buscar_aluno(valor: str, db: AsyncSession = Depends(get_db)):
+    stmt = select(AlunoModel)
 
-    aluno = result.scalar_one_or_none()
+    if valor.isdigit():
+        stmt = stmt.where(
+            or_(
+                AlunoModel.id == int(valor),
+                AlunoModel.nome.ilike(f"%{valor}%")
+            )
+        )
+    else:
+        stmt = stmt.where(
+            AlunoModel.nome.ilike(f"%{valor}%")
+        )
 
-    if not aluno:
-        raise HTTPException(status_code=404, detail="Aluno não encontrado")
+    result = await db.execute(stmt)
+    alunos = result.scalars().all()
 
-    return aluno
+    return alunos
 
 
 # ==============================

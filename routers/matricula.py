@@ -47,9 +47,16 @@ async def create_matricula(
     stmt = (
         select(
             MatriculaModel.id,
+            MatriculaModel.aluno_id,
+            MatriculaModel.classe_id,
+            MatriculaModel.turma_id,
             MatriculaModel.ano_letivo,
             MatriculaModel.status,
+
             AlunoModel.nome.label("aluno_nome"),
+            AlunoModel.sexo.label("sexo"),
+            AlunoModel.data_nascimento.label("data_nascimento"),
+
             ClasseModel.classe.label("classe_nome"),
             TurmaModel.turma.label("turma_nome")
         )
@@ -71,9 +78,16 @@ async def get_matriculas(db: AsyncSession = Depends(get_db)):
     stmt = (
         select(
             MatriculaModel.id,
+            MatriculaModel.aluno_id,
+            MatriculaModel.classe_id,
+            MatriculaModel.turma_id,
             MatriculaModel.ano_letivo,
             MatriculaModel.status,
+
             AlunoModel.nome.label("aluno_nome"),
+            AlunoModel.sexo.label("sexo"),
+            AlunoModel.data_nascimento.label("data_nascimento"),
+
             ClasseModel.classe.label("classe_nome"),
             TurmaModel.turma.label("turma_nome")
         )
@@ -97,9 +111,16 @@ async def get_matricula(
     stmt = (
         select(
             MatriculaModel.id,
+            MatriculaModel.aluno_id,
+            MatriculaModel.classe_id,
+            MatriculaModel.turma_id,
             MatriculaModel.ano_letivo,
             MatriculaModel.status,
+
             AlunoModel.nome.label("aluno_nome"),
+            AlunoModel.sexo.label("sexo"),
+            AlunoModel.data_nascimento.label("data_nascimento"),
+
             ClasseModel.classe.label("classe_nome"),
             TurmaModel.turma.label("turma_nome")
         )
@@ -158,9 +179,16 @@ async def update_matricula(
     stmt = (
         select(
             MatriculaModel.id,
+            MatriculaModel.aluno_id,
+            MatriculaModel.classe_id,
+            MatriculaModel.turma_id,
             MatriculaModel.ano_letivo,
             MatriculaModel.status,
+
             AlunoModel.nome.label("aluno_nome"),
+            AlunoModel.sexo.label("sexo"),
+            AlunoModel.data_nascimento.label("data_nascimento"),
+
             ClasseModel.classe.label("classe_nome"),
             TurmaModel.turma.label("turma_nome")
         )

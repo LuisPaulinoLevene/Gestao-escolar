@@ -74,3 +74,5 @@ async def delete_professor(professor_id: int, db: AsyncSession = Depends(get_db)
     await db.delete(professor)
     await db.commit()
     return {"message": f"Professor {professor_id} removido com sucesso"}
+
+

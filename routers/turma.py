@@ -95,3 +95,5 @@ async def apagar_turma(turma_id: int, db: AsyncSession = Depends(get_db)):
     await db.delete(turma)
     await db.commit()
     return {"message": "Turma removida com sucesso"}
+
+
