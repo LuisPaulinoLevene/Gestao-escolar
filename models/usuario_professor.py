@@ -1,10 +1,17 @@
-# models/usuario_professor.py
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column,Integer,String,ForeignKey
 from database import Base
 
-class UsuarioProfessor(Base):
-    __tablename__ = "usuarios_professores"
 
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    nome = Column(String, unique=True, nullable=False)
-    senha = Column(String, nullable=False)
+class UsuarioProfessor(Base):
+
+    __tablename__="usuarios_professores"
+
+    id=Column(Integer,primary_key=True,index=True)
+
+    professor_id=Column(
+        Integer,
+        ForeignKey("professores.id"),
+        unique=True
+    )
+
+    senha=Column(String(255))

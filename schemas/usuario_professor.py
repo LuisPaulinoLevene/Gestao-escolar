@@ -1,14 +1,21 @@
-# schemas/usuario_professor.py
 from pydantic import BaseModel
 
 class UsuarioProfessorCreate(BaseModel):
-    nome: str
+
+    professor_id: int
+
     senha: str
 
+
 class UsuarioProfessorResponse(BaseModel):
+
     id: int
+
+    professor_id: int
+
     nome: str
+
     senha: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
