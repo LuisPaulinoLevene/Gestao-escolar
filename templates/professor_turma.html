@@ -390,6 +390,32 @@ button{
 
 }
 
+.mensagem-download{
+
+    position:fixed;
+
+    top:20px;
+
+    right:20px;
+
+    background:#198754;
+
+    color:white;
+
+    padding:15px 25px;
+
+    border-radius:6px;
+
+    font-size:18px;
+
+    box-shadow:0 3px 10px rgba(0,0,0,.3);
+
+    display:none;
+
+    z-index:99999;
+
+}
+
 </style>
 
 </head>
@@ -762,7 +788,9 @@ Baixar PDF
 </div>
 
 
-
+<div id="mensagemDownload" class="mensagem-download">
+    ✅ Download concluído.
+</div>
 
 
 </div>
@@ -901,23 +929,63 @@ document.addEventListener("DOMContentLoaded", function(){
 
 });
 
-// ==========================
-// BAIXAR PDF
-// ==========================
+function mostrarMensagem(texto){
 
-function baixarPDF(){
+    const div = document.getElementById("mensagemDownload");
 
-    window.location.href = "/pdf/turma/{{ turma.id }}";
+    div.innerHTML = texto;
+
+    div.style.display = "block";
+
+    setTimeout(function(){
+
+        div.style.display = "none";
+
+    },3000);
 
 }
 
 // ==========================
-// BAIXAR WORD
+// BAIXAR PDF
 // ==========================
 
-function baixarWord(){
+async function baixarPDF(){
 
-    window.location.href = "/pdf/word/turma/{{ turma.id }}";
+    try{
+
+        const resposta = await fetch("/pdf/turma/{{ turma.id }}");
+
+        const dados = await resposta.json();
+
+        mostrarMensagem("✅ Download concluído.");
+
+    }
+
+    catch(e){
+
+        mostrarMensagem("❌ Erro ao gerar PDF.");
+
+    }
+
+}
+
+async function baixarWord(){
+
+    try{
+
+        const resposta = await fetch("/pdf/word/turma/{{ turma.id }}");
+
+        const dados = await resposta.json();
+
+        mostrarMensagem("✅ Download concluído.");
+
+    }
+
+    catch(e){
+
+        mostrarMensagem("❌ Erro ao gerar Word.");
+
+    }
 
 }
 </script>
