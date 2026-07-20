@@ -45,6 +45,35 @@ body{
 
 }
 
+.folha{
+    width:100%;
+    max-width:900px;
+    overflow-x:auto;
+}
+
+@media(max-width:600px){
+
+    .folha{
+        padding:15px;
+    }
+
+
+    .cabecalho h2{
+        font-size:16px;
+    }
+
+
+    .cabecalho h3{
+        font-size:14px;
+    }
+
+
+    .cabecalho h4{
+        font-size:13px;
+    }
+
+
+}
 
 
 /* CABEÇALHO */
@@ -56,10 +85,13 @@ body{
 }
 
 
-.cabecalho img{
-    width:90px;
-    height:90px;
-    margin-bottom:10px;
+@media(max-width:600px){
+
+    .cabecalho img{
+        width:70px;
+        height:70px;
+    }
+
 }
 
 
@@ -165,11 +197,8 @@ body{
 /* TABELA */
 
 
-table{
-
-    width:100%;
-    border-collapse:collapse;
-
+.tabela-container{
+    overflow-x:auto;
 }
 
 
@@ -442,7 +471,7 @@ LISTA NOMINAL DOS ALUNOS
 
 <!-- ================= LISTA ALUNOS ================= -->
 
-
+<div class="tabela-container">
 <table>
 
 
@@ -520,12 +549,12 @@ Estado
 
 
 
-
 <td>
 {% if aluno.data_nascimento %}
 {{ aluno.data_nascimento.strftime("%d/%m/%Y") }}
 {% endif %}
 </td>
+
 
 
 
@@ -550,7 +579,7 @@ Ativo
 
 
 </table>
-
+</div>
 
 
 
