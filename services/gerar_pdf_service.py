@@ -1,30 +1,48 @@
-from services import playwright_service
+from playwright.sync_api import sync_playwright
 
-playwright = None
-browser = None
-async def gerar_pdf(html: str) -> bytes:
 
-    page = await playwright_service.browser.new_page(
-        viewport={
-            "width": 900,
-            "height": 1200
-        }
-    )
+def gerar_pdf(html: str) -> bytes:
 
-    try:
-        await page.set_content(
+    with sync_playwright() as p:
+
+        browser = p.chromium.launch(
+            headless=True
+        )
+
+        pagina = browser.new_page()
+
+
+        pagina.set_content(
             html,
-            wait_until="load"
+            wait_until="networkidle"
         )
 
-        await page.emulate_media(
-            media="print"
-        )
 
-        pdf = await page.pdf(
+        # Esperar todas as imagens carregarem
+        pagina.evaluate("""
+            () => Promise.all(
+                Array.from(document.images)
+                .map(img => {
+                    if (img.complete) {
+                        return Promise.resolve();
+                    }
+
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                })
+            )
+        """)
+
+
+        # Pequena espera para renderização completa
+        pagina.wait_for_timeout(1000)
+
+
+        pdf = pagina.pdf(
             format="A4",
             print_background=True,
-            prefer_css_page_size=True,
             margin={
                 "top": "10mm",
                 "bottom": "10mm",
@@ -33,7 +51,8 @@ async def gerar_pdf(html: str) -> bytes:
             }
         )
 
-        return pdf
 
-    finally:
-        await page.close()
+        browser.close()
+
+
+        return pdf
