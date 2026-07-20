@@ -1,2 +1,0 @@
-playwright = None
-browser = None
