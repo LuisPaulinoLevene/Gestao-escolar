@@ -637,6 +637,15 @@ async function iniciar() {
 
 iniciar();
 
+function formatarData(data){
+
+    if(!data) return "";
+
+    const [ano, mes, dia] = data.split("-");
+
+    return `${dia}/${mes}/${ano}`;
+}
+
 // ======================================
 // LISTAR ALUNOS DA TURMA
 // ======================================
@@ -806,7 +815,7 @@ async function listarAlunos(){
 
                 <td>${m.sexo}</td>
 
-                <td>${m.data_nascimento}</td>
+                <td>${formatarData(m.data_nascimento)}</td>
 
                 <td>${m.classe_nome}</td>
 
