@@ -2,9 +2,6 @@ import os
 from playwright.sync_api import sync_playwright
 
 
-from playwright.sync_api import sync_playwright
-
-
 def gerar_pdf(html: str):
 
     with sync_playwright() as p:
