@@ -6,11 +6,25 @@ def gerar_pdf(html: str) -> bytes:
 
     print("=== LISTANDO PLAYWRIGHT ===")
 
+    caminhos = []
+
+    base = "/opt/render/.cache/ms-playwright"
+
     for caminho in glob.glob(
-        "/opt/render/.cache/ms-playwright/**/*",
+        base + "/**/*",
         recursive=True
     ):
-        if "chrome" in caminho:
-            print(caminho)
 
-    raise Exception("Teste de caminho concluído")
+        if (
+            "chrome" in caminho.lower()
+            or "chromium" in caminho.lower()
+        ):
+            caminhos.append(caminho)
+
+    print(caminhos)
+
+    raise Exception({
+        "cache": os.path.exists(base),
+        "quantidade": len(caminhos),
+        "caminhos": caminhos
+    })
