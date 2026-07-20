@@ -2,18 +2,20 @@ import os
 from playwright.sync_api import sync_playwright
 
 
-def gerar_pdf(html: str) -> bytes:
+from playwright.sync_api import sync_playwright
 
-    browser_path = (
-        "/opt/render/project/src/ms-playwright/"
-        "chromium-1228/chrome-linux64/chrome"
-    )
 
-    # Verificação para facilitar o debug
-    print("=" * 60)
-    print("Browser:", browser_path)
-    print("Existe?", os.path.exists(browser_path))
-    print("=" * 60)
+def gerar_pdf(html: str):
+
+    with sync_playwright() as p:
+
+        browser = p.chromium.launch(
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+            ]
+        )
 
     with sync_playwright() as p:
 
