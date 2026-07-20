@@ -208,18 +208,33 @@ async def gerar_pdf_turma(
     ).render(contexto)
 
 
-    pdf = await asyncio.to_thread(
-        gerar_pdf,
-        html
-    )
+    try:
 
-    return Response(
-        content=pdf,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": "attachment; filename=lista_turma.pdf"
-        }
-    )
+        print("GERANDO PDF...")
+        
+        pdf = await asyncio.to_thread(
+            gerar_pdf,
+            html
+        )
+    
+        print("PDF GERADO COM SUCESSO")
+    
+        return Response(
+            content=pdf,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": "attachment; filename=lista_turma.pdf"
+            }
+        )
+    
+    except Exception as e:
+    
+        print("ERRO AO GERAR PDF:", repr(e))
+    
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
 
 @router.get("/word/turma/{turma_id}")
