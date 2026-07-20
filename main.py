@@ -1,13 +1,11 @@
 # main.py
-
 import os
 import asyncio
 import sys
 
 if sys.platform == "win32":
-    asyncio.set_event_loop_policy(
-        asyncio.WindowsProactorEventLoopPolicy()
-    )
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+from playwright.async_api import async_playwright
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -59,7 +57,8 @@ app = FastAPI(
     docs_url=None if is_production else "/docs",
     redoc_url=None if is_production else "/redoc"
 )
-
+# Playwright global
+from services import playwright_service
 # ==========================
 # CORS
 # ==========================
@@ -81,8 +80,23 @@ app.add_middleware(
 async def startup():
 
     global AUDIT_REGISTRADO
+    global playwright, browser
 
     print("Iniciando sistema...")
+
+    # Iniciar Playwright primeiro
+    try:
+        playwright_service.playwright = await async_playwright().start()
+
+        playwright_service.browser = await playwright_service.playwright.chromium.launch(
+            headless=True,
+            args=["--no-sandbox"]
+        )
+
+        print("✅ Playwright iniciado")
+
+    except Exception as e:
+        print("❌ Playwright:", e)
 
     try:
         async with engine_primary.begin() as conn:
@@ -242,6 +256,18 @@ app.include_router(acessos.router)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+@app.on_event("shutdown")
+async def shutdown():
+
+    global playwright, browser
+
+    if browser:
+        await browser.close()
+
+    if playwright:
+        await playwright.stop()
+
+    print("✅ Playwright encerrado")
 # ==========================
 # FIM
 # ==========================
