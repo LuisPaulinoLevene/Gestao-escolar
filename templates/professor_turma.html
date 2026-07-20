@@ -18,6 +18,10 @@
 }
 
 
+/* ==========================
+   PÁGINA
+========================== */
+
 body{
 
     margin:0;
@@ -27,56 +31,48 @@ body{
 }
 
 
+/* ==========================
+   CONTAINER
+========================== */
+
 .container{
 
+    width:100%;
     max-width:900px;
     margin:auto;
 
 }
 
 
+
+/* ==========================
+   FOLHA A4
+========================== */
+
 .folha{
 
     background:#fff;
-    padding:35px;
-    border:1px solid #000;
+
+    width:900px;
+
     min-height:1122px;
+
+    padding:35px;
+
+    border:1px solid #000;
+
     box-shadow:0 0 10px rgba(0,0,0,.15);
 
-}
-
-.folha{
-    width:100%;
-    max-width:900px;
-    overflow-x:auto;
-}
-
-@media(max-width:600px){
-
-    .folha{
-        padding:15px;
-    }
-
-
-    .cabecalho h2{
-        font-size:16px;
-    }
-
-
-    .cabecalho h3{
-        font-size:14px;
-    }
-
-
-    .cabecalho h4{
-        font-size:13px;
-    }
-
+    overflow:hidden;
 
 }
 
 
-/* CABEÇALHO */
+
+/* ==========================
+   CABEÇALHO
+========================== */
+
 
 .cabecalho{
 
@@ -85,12 +81,11 @@ body{
 }
 
 
-@media(max-width:600px){
+.cabecalho img{
 
-    .cabecalho img{
-        width:70px;
-        height:70px;
-    }
+    width:90px;
+    height:90px;
+    margin-bottom:10px;
 
 }
 
@@ -123,53 +118,22 @@ body{
 
 
 
-/* DADOS ESCOLA */
 
-
-.dados{
-
-    margin-top:30px;
-
-}
-
-
-.linha{
-
-    display:flex;
-    margin-bottom:10px;
-
-}
-
-
-.label{
-
-    width:120px;
-    font-weight:bold;
-
-}
-
-
-.valor{
-
-    flex:1;
-    border-bottom:1px dotted #000;
-    padding-left:8px;
-
-}
-
-
-
-
-
-/* TURMA */
+/* ==========================
+   TURMA
+========================== */
 
 
 .turma{
 
     display:flex;
+
     justify-content:space-between;
+
     margin-top:25px;
+
     margin-bottom:25px;
+
     font-weight:bold;
 
 }
@@ -178,15 +142,20 @@ body{
 
 
 
-/* TITULO */
+/* ==========================
+   TITULO
+========================== */
 
 
 .titulo{
 
     text-align:center;
+
     font-size:20px;
-    margin-bottom:20px;
+
     font-weight:bold;
+
+    margin-bottom:20px;
 
 }
 
@@ -194,12 +163,28 @@ body{
 
 
 
-/* TABELA */
+/* ==========================
+   TABELA
+========================== */
 
 
 .tabela-container{
+
+    width:100%;
+
     overflow-x:auto;
+
 }
+
+
+table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
 
 
 th{
@@ -209,13 +194,19 @@ th{
 }
 
 
+
 th,td{
 
     border:1px solid #000;
+
     padding:7px;
+
     font-size:14px;
 
+    white-space:nowrap;
+
 }
+
 
 
 td{
@@ -235,7 +226,9 @@ td.nome{
 
 
 
-/* ESTATISTICA */
+/* ==========================
+   ESTATÍSTICA
+========================== */
 
 
 .estatistica{
@@ -262,12 +255,15 @@ td.nome{
 
 
 
-/* ASSINATURA */
+/* ==========================
+   ASSINATURA
+========================== */
 
 
 .assinatura{
 
     margin-top:80px;
+
     text-align:center;
 
 }
@@ -276,8 +272,11 @@ td.nome{
 .assinatura .linha{
 
     width:300px;
+
     border-top:1px solid #000;
+
     margin:auto;
+
     display:block;
 
 }
@@ -286,12 +285,15 @@ td.nome{
 
 
 
-/* BOTAO */
+/* ==========================
+   BOTÃO
+========================== */
 
 
 .acoes{
 
     text-align:center;
+
     margin-top:25px;
 
 }
@@ -300,10 +302,15 @@ td.nome{
 button{
 
     padding:10px 20px;
+
     background:#0d6efd;
+
     color:white;
+
     border:none;
+
     cursor:pointer;
+
     border-radius:5px;
 
 }
@@ -311,45 +318,113 @@ button{
 
 
 
-/* IMPRESSÃO */
+
+/* ==========================
+   CELULAR
+   Mantém A4 e permite zoom
+========================== */
 
 
-@media print{
+@media(max-width:900px){
 
-    @page{
-        size: A4;
-        margin: 10mm;
-    }
 
     body{
-        background:white;
-        margin:0;
-        padding:0;
+
+        padding:10px;
+
+        overflow-x:auto;
+
     }
 
-    .acoes{
-        display:none;
-    }
+
 
     .container{
+
+        width:900px;
+
         margin:0;
-        padding:0;
+
     }
 
+
     .folha{
-        width:100%;
-        min-height:auto;
-        height:auto;
-        border:none;
-        box-shadow:none;
-        padding:15mm;
+
+        width:900px;
+
     }
+
 
 }
 
 
-</style>
 
+
+
+/* ==========================
+   IMPRESSÃO A4
+========================== */
+
+
+@media print{
+
+
+    @page{
+
+        size:A4;
+
+        margin:10mm;
+
+    }
+
+
+
+    body{
+
+        background:white;
+
+        margin:0;
+
+        padding:0;
+
+    }
+
+
+
+    .container{
+
+        width:100%;
+
+    }
+
+
+
+    .folha{
+
+        width:100%;
+
+        min-height:auto;
+
+        border:none;
+
+        box-shadow:none;
+
+        padding:15mm;
+
+    }
+
+
+
+    .acoes{
+
+        display:none;
+
+    }
+
+
+
+}
+
+</style>
 
 </head>
 
