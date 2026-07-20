@@ -1,11 +1,12 @@
 # main.py
 import os
-import asyncio
 import sys
+import asyncio
 
 if sys.platform == "win32":
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-from playwright.async_api import async_playwright
+    asyncio.set_event_loop_policy(
+        asyncio.WindowsProactorEventLoopPolicy()
+    )
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,7 +25,7 @@ from routers import (
     professor, aluno, classe, turma, matricula, admin, dap,
     director, chefe_secretaria, funcionario_secretaria, usuario_professor,
     dashboard, importar_alunos, sms, encontro, contactos, assistencias,
-    mozesms, encontro_coletivo, outros_encontros,  disciplina, distribuicao, escola,
+    mozesms, encontro_coletivo, outros_encontros, disciplina, distribuicao, escola,
     pdf_turma
 )
 
@@ -57,8 +58,7 @@ app = FastAPI(
     docs_url=None if is_production else "/docs",
     redoc_url=None if is_production else "/redoc"
 )
-# Playwright global
-from services import playwright_service
+
 # ==========================
 # CORS
 # ==========================
@@ -73,30 +73,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # ==========================
 # STARTUP (SEM MONITORES)
 # ==========================
 @app.on_event("startup")
 async def startup():
-
     global AUDIT_REGISTRADO
-    global playwright, browser
 
     print("Iniciando sistema...")
 
-    # Iniciar Playwright primeiro
-    try:
-        playwright_service.playwright = await async_playwright().start()
-
-        playwright_service.browser = await playwright_service.playwright.chromium.launch(
-            headless=True,
-            args=["--no-sandbox"]
-        )
-
-        print("✅ Playwright iniciado")
-
-    except Exception as e:
-        print("❌ Playwright:", e)
 
     try:
         async with engine_primary.begin() as conn:
@@ -121,18 +107,18 @@ async def startup():
 
     print("✅ Sistema iniciado")
 
+
 @app.get("/system/database")
 async def database_status():
-
     return await status_bancos()
+
 
 @app.get("/sync/database")
 async def sync_database():
-
     await replicar_eventos()
 
     return {
-        "status":"sincronização concluída"
+        "status": "sincronização concluída"
     }
 
 
@@ -178,7 +164,6 @@ async def run_outros():
     return {"status": "outros encontros executado"}
 
 
-
 # ==========================
 # API ROUTES
 # ==========================
@@ -212,7 +197,6 @@ app.include_router(disciplina.router)
 app.include_router(distribuicao.router)
 app.include_router(escola.router)
 app.include_router(pdf_turma.router)
-
 
 # ==========================
 # HTML PAGES
@@ -252,22 +236,8 @@ app.include_router(alunos_por_turma.router)
 app.include_router(escolas.router)
 app.include_router(acessos.router)
 
-
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.on_event("shutdown")
-async def shutdown():
-
-    global playwright, browser
-
-    if browser:
-        await browser.close()
-
-    if playwright:
-        await playwright.stop()
-
-    print("✅ Playwright encerrado")
 # ==========================
 # FIM
 # ==========================
