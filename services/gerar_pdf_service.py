@@ -1,5 +1,4 @@
 import os
-
 from playwright.sync_api import sync_playwright
 
 
@@ -9,16 +8,11 @@ def gerar_pdf(html: str) -> bytes:
 
         browser = p.chromium.launch(
             headless=True,
-            executable_path=os.getenv(
-                "PLAYWRIGHT_BROWSERS_PATH",
-                None
-            ),
             args=[
                 "--no-sandbox",
                 "--disable-dev-shm-usage"
             ]
         )
-
 
         pagina = browser.new_page()
 
@@ -26,7 +20,6 @@ def gerar_pdf(html: str) -> bytes:
             html,
             wait_until="networkidle"
         )
-
 
         pdf = pagina.pdf(
             format="A4",
@@ -38,7 +31,6 @@ def gerar_pdf(html: str) -> bytes:
                 "right": "10mm"
             }
         )
-
 
         browser.close()
 
