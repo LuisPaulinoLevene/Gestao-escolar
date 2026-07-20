@@ -516,9 +516,9 @@ Estado
 
 
 <td>
-
-{{ aluno.data_nascimento }}
-
+{% if aluno.data_nascimento %}
+{{ aluno.data_nascimento.strftime("%d/%m/%Y") }}
+{% endif %}
 </td>
 
 
