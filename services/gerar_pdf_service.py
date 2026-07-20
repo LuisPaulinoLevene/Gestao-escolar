@@ -1,19 +1,69 @@
 import os
+from playwright.sync_api import sync_playwright
 
-def gerar_pdf(html):
 
-    caminhos = [
-        "/opt/render",
-        "/opt/render/project",
-        "/opt/render/project/src",
-        "/opt/render/.cache",
-        "/opt/render/project/.cache",
-        "/opt/render/project/src/.cache",
-    ]
+def gerar_pdf(html: str) -> bytes:
 
-    resultado = {}
+    browser_path = (
+        "/opt/render/project/src/ms-playwright/"
+        "chromium-1228/chrome-linux64/chrome"
+    )
 
-    for p in caminhos:
-        resultado[p] = os.path.exists(p)
+    # Verificação para facilitar o debug
+    print("=" * 60)
+    print("Browser:", browser_path)
+    print("Existe?", os.path.exists(browser_path))
+    print("=" * 60)
 
-    raise Exception(resultado)
+    with sync_playwright() as p:
+
+        browser = p.chromium.launch(
+            executable_path=browser_path,
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--single-process",
+                "--disable-setuid-sandbox",
+            ],
+        )
+
+        page = browser.new_page()
+
+        page.set_content(
+            html,
+            wait_until="networkidle"
+        )
+
+        # Esperar carregamento das imagens
+        page.evaluate("""
+            () => Promise.all(
+                Array.from(document.images).map(img => {
+                    if (img.complete) {
+                        return Promise.resolve();
+                    }
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                })
+            )
+        """)
+
+        page.wait_for_timeout(1000)
+
+        pdf = page.pdf(
+            format="A4",
+            print_background=True,
+            margin={
+                "top": "10mm",
+                "bottom": "10mm",
+                "left": "10mm",
+                "right": "10mm",
+            },
+        )
+
+        browser.close()
+
+        return pdf
