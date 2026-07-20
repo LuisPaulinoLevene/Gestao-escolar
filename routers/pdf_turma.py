@@ -1,11 +1,5 @@
-import asyncio
-import sys
-
-if sys.platform == "win32":
-    asyncio.set_event_loop_policy(
-        asyncio.WindowsProactorEventLoopPolicy()
-    )
 import os
+import asyncio
 from docx.shared import Inches
 from io import BytesIO
 from docx import Document
@@ -20,8 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from database import get_db
-
-from playwright.async_api import async_playwright
+from services.gerar_pdf_service import gerar_pdf
 
 
 # MODELOS
@@ -206,9 +199,6 @@ async def gerar_pdf_turma(
         "ano": ano
     }
 
-
-
-
     # ===============================
     # GERAR HTML
     # ===============================
@@ -218,77 +208,17 @@ async def gerar_pdf_turma(
     ).render(contexto)
 
 
-
-
-
-    # ===============================
-    # PLAYWRIGHT PDF
-    # ===============================
-
-
-    async with async_playwright() as p:
-
-
-        browser = await p.chromium.launch(
-            headless=True
-        )
-
-
-        page = await browser.new_page(
-            viewport={
-                "width":900,
-                "height":1200
-            }
-        )
-
-        await page.set_content(
-            html,
-            wait_until="networkidle"
-        )
-
-        await page.emulate_media(
-            media="print"
-        )
-
-        pdf = await page.pdf(
-
-            format="A4",
-
-            print_background=False,
-
-            prefer_css_page_size=True,
-
-            margin={
-
-                "top": "10mm",
-                "bottom": "10mm",
-                "left": "10mm",
-                "right": "10mm"
-
-            }
-
-        )
-
-
-
-        await browser.close()
-
-
-
+    pdf = await asyncio.to_thread(
+        gerar_pdf,
+        html
+    )
 
     return Response(
-
         content=pdf,
-
         media_type="application/pdf",
-
         headers={
-
-            "Content-Disposition":
-            "attachment; filename=lista_turma.pdf"
-
+            "Content-Disposition": "attachment; filename=lista_turma.pdf"
         }
-
     )
 
 
