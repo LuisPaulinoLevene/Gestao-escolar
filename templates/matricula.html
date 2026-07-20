@@ -327,7 +327,11 @@ Nenhum aluno encontrado
 CONFIGURAÇÃO DA API
 ======================================*/
 
-const API = "http://127.0.0.1:8000";
+const API =
+    window.location.hostname === "localhost"
+        ? "http://localhost:8000"
+        : "";
+let usuario=null;
 
 const classe = document.getElementById("classe");
 const turma = document.getElementById("turma");

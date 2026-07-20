@@ -367,9 +367,13 @@ class="info"
 </div>
 <script>
 
-const API="http://127.0.0.1:8000";
+const API =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1"
+        ? "http://localhost:8000"
+        : "";
 
-let usuarioId=null;
+let usuario = null;
 
 const professor=document.getElementById("professor");
 const senha=document.getElementById("senha");
