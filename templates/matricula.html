@@ -556,44 +556,28 @@ function desenharTabela(){
 
 }
 
-
-/*=====================================
-INICIALIZAÇÃO
-======================================*/
-
 /*=====================================
 INICIALIZAÇÃO RÁPIDA
 ======================================*/
 
 async function iniciar(){
 
-
-    // carregar alunos imediatamente
-
-    carregarAlunos()
-    .then(()=>{
-
-        resultadoPesquisa = alunos;
-
-        desenharTabela();
-
-    });
-
-
-
-    // carregar o resto em paralelo
-
-    Promise.all([
-
+    await Promise.all([
         carregarClasses(),
-
         carregarTurmas(),
-
+        carregarAlunos(),
         carregarMatriculas()
-
     ]);
 
+    // Mostrar apenas alunos não matriculados
+    resultadoPesquisa = alunos.filter(aluno =>
+        !matriculas.some(m =>
+            m.aluno_id == aluno.id &&
+            m.ano_letivo == Number(ano.value)
+        )
+    );
 
+    desenharTabela();
 }
 
 iniciar();
