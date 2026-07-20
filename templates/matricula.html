@@ -495,6 +495,18 @@ document.getElementById("btnPesquisar").onclick=function(){
 
 };
 
+function formatarData(data){
+
+    if(!data) return "";
+
+    const d = new Date(data);
+
+    const dia = String(d.getDate()).padStart(2,"0");
+    const mes = String(d.getMonth()+1).padStart(2,"0");
+    const ano = d.getFullYear();
+
+    return `${dia}/${mes}/${ano}`;
+}
 
 /*=====================================
 DESENHAR TABELA
@@ -534,7 +546,7 @@ function desenharTabela(){
 
             <td>${aluno.sexo}</td>
 
-            <td>${aluno.data_nascimento}</td>
+            <td>${formatarData(aluno.data_nascimento)}</td>
 
             <td>
 
