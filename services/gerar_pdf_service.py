@@ -1,23 +1,11 @@
-import os
 from playwright.sync_api import sync_playwright
 
 
-def gerar_pdf(html: str):
+def gerar_pdf(html: str) -> bytes:
 
     with sync_playwright() as p:
 
         browser = p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-            ]
-        )
-
-    with sync_playwright() as p:
-
-        browser = p.chromium.launch(
-            executable_path=browser_path,
             headless=True,
             args=[
                 "--no-sandbox",
@@ -35,7 +23,7 @@ def gerar_pdf(html: str):
             wait_until="networkidle"
         )
 
-        # Esperar carregamento das imagens
+        # Espera todas as imagens carregarem
         page.evaluate("""
             () => Promise.all(
                 Array.from(document.images).map(img => {
