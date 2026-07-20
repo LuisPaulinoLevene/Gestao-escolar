@@ -287,28 +287,34 @@ button{
 
 @media print{
 
+    @page{
+        size: A4;
+        margin: 10mm;
+    }
 
-body{
+    body{
+        background:white;
+        margin:0;
+        padding:0;
+    }
 
-    background:white;
+    .acoes{
+        display:none;
+    }
 
-}
+    .container{
+        margin:0;
+        padding:0;
+    }
 
-
-.acoes{
-
-    display:none;
-
-}
-
-
-.folha{
-
-    box-shadow:none;
-    border:none;
-
-}
-
+    .folha{
+        width:100%;
+        min-height:auto;
+        height:auto;
+        border:none;
+        box-shadow:none;
+        padding:15mm;
+    }
 
 }
 
