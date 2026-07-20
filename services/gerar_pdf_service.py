@@ -1,30 +1,19 @@
 import os
-import glob
 
+def gerar_pdf(html):
 
-def gerar_pdf(html: str) -> bytes:
+    caminhos = [
+        "/opt/render",
+        "/opt/render/project",
+        "/opt/render/project/src",
+        "/opt/render/.cache",
+        "/opt/render/project/.cache",
+        "/opt/render/project/src/.cache",
+    ]
 
-    print("=== LISTANDO PLAYWRIGHT ===")
+    resultado = {}
 
-    caminhos = []
+    for p in caminhos:
+        resultado[p] = os.path.exists(p)
 
-    base = "/opt/render/.cache/ms-playwright"
-
-    for caminho in glob.glob(
-        base + "/**/*",
-        recursive=True
-    ):
-
-        if (
-            "chrome" in caminho.lower()
-            or "chromium" in caminho.lower()
-        ):
-            caminhos.append(caminho)
-
-    print(caminhos)
-
-    raise Exception({
-        "cache": os.path.exists(base),
-        "quantidade": len(caminhos),
-        "caminhos": caminhos
-    })
+    raise Exception(resultado)
