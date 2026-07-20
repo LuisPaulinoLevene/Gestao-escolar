@@ -1,3 +1,5 @@
+from pathlib import Path
+from fastapi.responses import HTMLResponse
 import os
 import asyncio
 from docx.shared import Inches
@@ -6,7 +8,6 @@ from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from fastapi import APIRouter, Request, Depends, HTTPException
-from fastapi.responses import Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import selectinload
 
@@ -36,7 +37,17 @@ templates = Jinja2Templates(
     directory="templates"
 )
 
+DOWNLOAD_DIR = Path("static/downloads")
+DOWNLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+def proximo_nome(prefixo: str, extensao: str):
+
+    numero = 1
+
+    while (DOWNLOAD_DIR / f"{prefixo}_{numero}.{extensao}").exists():
+        numero += 1
+
+    return f"{prefixo}_{numero}.{extensao}"
 
 @router.get("/turma/{turma_id}")
 async def gerar_pdf_turma(
@@ -207,35 +218,26 @@ async def gerar_pdf_turma(
         "professor_turma.html"
     ).render(contexto)
 
+    pdf = await asyncio.to_thread(
+        gerar_pdf,
+        html
+    )
 
-    try:
+    nome_pdf = proximo_nome(
+        "lista_turma",
+        "pdf"
+    )
 
-        print("GERANDO PDF...")
-        
-        pdf = await asyncio.to_thread(
-            gerar_pdf,
-            html
-        )
-    
-        print("PDF GERADO COM SUCESSO")
-    
-        return Response(
-            content=pdf,
-            media_type="application/pdf",
-            headers={
-                "Content-Disposition": "attachment; filename=lista_turma.pdf"
-            }
-        )
-    
-    except Exception as e:
-    
-        print("ERRO AO GERAR PDF:", repr(e))
-    
-        raise HTTPException(
-            status_code=500,
-            detail=str(e)
-        )
+    caminho = DOWNLOAD_DIR / nome_pdf
 
+    with open(caminho, "wb") as f:
+        f.write(pdf)
+
+    return {
+        "status": "ok",
+        "arquivo": nome_pdf,
+        "url": f"/static/downloads/{nome_pdf}"
+    }
 
 @router.get("/word/turma/{turma_id}")
 async def gerar_word_turma(
@@ -435,17 +437,18 @@ async def gerar_word_turma(
 
     arquivo.seek(0)
 
-    return Response(
-
-        content=arquivo.read(),
-
-        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-
-        headers={
-
-            "Content-Disposition":
-                "attachment; filename=lista_turma.docx"
-
-        }
-
+    nome_word = proximo_nome(
+        "lista_turma",
+        "docx"
     )
+
+    caminho = DOWNLOAD_DIR / nome_word
+
+    with open(caminho, "wb") as f:
+        f.write(arquivo.read())
+
+    return {
+        "status": "ok",
+        "arquivo": nome_word,
+        "url": f"/static/downloads/{nome_word}"
+    }
