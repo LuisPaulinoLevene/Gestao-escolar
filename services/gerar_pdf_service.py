@@ -6,7 +6,11 @@ def gerar_pdf(html: str) -> bytes:
     with sync_playwright() as p:
 
         browser = p.chromium.launch(
-            headless=True
+            headless=True,
+            args=[
+                "--no-sandbox",
+                "--disable-dev-shm-usage"
+            ]
         )
 
         pagina = browser.new_page()
