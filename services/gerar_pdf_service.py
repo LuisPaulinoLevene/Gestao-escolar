@@ -8,6 +8,10 @@ def gerar_pdf(html: str) -> bytes:
 
         browser = p.chromium.launch(
             headless=True,
+            executable_path=os.environ.get(
+                "CHROME_PATH",
+                "/opt/render/.cache/ms-playwright/chromium-1228/chrome-linux64/chrome"
+            ),
             args=[
                 "--no-sandbox",
                 "--disable-dev-shm-usage"
@@ -16,10 +20,15 @@ def gerar_pdf(html: str) -> bytes:
 
         pagina = browser.new_page()
 
+
         pagina.set_content(
             html,
             wait_until="networkidle"
         )
+
+
+        pagina.wait_for_timeout(1000)
+
 
         pdf = pagina.pdf(
             format="A4",
@@ -31,6 +40,7 @@ def gerar_pdf(html: str) -> bytes:
                 "right": "10mm"
             }
         )
+
 
         browser.close()
 
