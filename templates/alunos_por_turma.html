@@ -646,6 +646,15 @@ function formatarData(data){
     return `${dia}/${mes}/${ano}`;
 }
 
+function formatarData(data){
+
+    if(!data) return "";
+
+    const [ano, mes, dia] = data.split("-");
+
+    return `${dia}/${mes}/${ano}`;
+}
+
 // ======================================
 // LISTAR ALUNOS DA TURMA
 // ======================================

@@ -1,6 +1,13 @@
 # main.py
+
 import os
 import asyncio
+import sys
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(
+        asyncio.WindowsProactorEventLoopPolicy()
+    )
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,7 +26,8 @@ from routers import (
     professor, aluno, classe, turma, matricula, admin, dap,
     director, chefe_secretaria, funcionario_secretaria, usuario_professor,
     dashboard, importar_alunos, sms, encontro, contactos, assistencias,
-    mozesms, encontro_coletivo, outros_encontros,  disciplina, distribuicao, escola
+    mozesms, encontro_coletivo, outros_encontros,  disciplina, distribuicao, escola,
+    pdf_turma
 )
 
 from routers.pages import (
@@ -189,6 +197,7 @@ app.include_router(outros_encontros.router)
 app.include_router(disciplina.router)
 app.include_router(distribuicao.router)
 app.include_router(escola.router)
+app.include_router(pdf_turma.router)
 
 
 # ==========================

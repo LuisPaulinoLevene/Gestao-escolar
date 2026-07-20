@@ -59,14 +59,7 @@ body{
 
     padding:35px;
 
-    border:1px solid #000;
-
-    box-shadow:0 0 10px rgba(0,0,0,.15);
-
-    overflow:hidden;
-
 }
-
 
 
 /* ==========================
@@ -367,57 +360,32 @@ button{
 
 @media print{
 
-
-    @page{
-
-        size:A4;
-
-        margin:10mm;
-
+    .acoes{
+        display:none;
     }
 
+}
 
+
+@page{
+
+    size:A4;
+
+    margin:10mm;
+
+}
+
+@media print{
 
     body{
-
-        background:white;
-
-        margin:0;
-
-        padding:0;
-
+        background:white !important;
+        padding:0 !important;
+        margin:0 !important;
     }
-
-
-
-    .container{
-
-        width:100%;
-
-    }
-
-
 
     .folha{
-
-        width:100%;
-
-        min-height:auto;
-
-        border:none;
-
-        box-shadow:none;
-
-        padding:15mm;
-
-    }
-
-
-
-    .acoes{
-
-        display:none;
-
+        box-shadow:none !important;
+        border:none !important;
     }
 
 }
@@ -443,7 +411,7 @@ button{
 
 <div class="cabecalho">
 
-    <img src="/static/img/img.png">
+    <img src="{{ request.base_url }}static/img/img.png">
 
     <h2>REPÚBLICA DE MOÇAMBIQUE</h2>
 
@@ -781,14 +749,16 @@ HM
 <div class="acoes">
 
 
-<button onclick="window.print()">
+<button onclick="baixarPDF()">
 
-Imprimir
+Baixar PDF
 
 </button>
 
 
-
+<button onclick="baixarWord()">
+    Baixar Word
+</button>
 </div>
 
 
@@ -931,28 +901,23 @@ document.addEventListener("DOMContentLoaded", function(){
 
 });
 
-
-
-
-
 // ==========================
-// CONFIRMAR IMPRESSÃO
+// BAIXAR PDF
 // ==========================
 
-function imprimirTurma(){
+function baixarPDF(){
 
+    window.location.href = "/pdf/turma/{{ turma.id }}";
 
-    let confirmar = confirm(
-        "Deseja imprimir a lista da turma?"
-    );
+}
 
+// ==========================
+// BAIXAR WORD
+// ==========================
 
-    if(confirmar){
+function baixarWord(){
 
-        window.print();
-
-    }
-
+    window.location.href = "/pdf/word/turma/{{ turma.id }}";
 
 }
 </script>
