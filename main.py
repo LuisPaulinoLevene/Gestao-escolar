@@ -59,6 +59,7 @@ app = FastAPI(
     redoc_url=None if is_production else "/redoc"
 )
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
 # ==========================
 # CORS
 # ==========================

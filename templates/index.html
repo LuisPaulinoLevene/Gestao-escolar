@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#1976d2">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <meta charset="UTF-8">
 <title>SIGE - EP Phandira-2</title>
 <style>
@@ -112,6 +116,13 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
         }, 3000);
     }
 });
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/static/service-worker.js")
+        .then(reg => console.log("Service Worker registrado"))
+        .catch(err => console.log(err));
+    });
+}
 </script>
 
 </body>
