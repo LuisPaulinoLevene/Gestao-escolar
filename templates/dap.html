@@ -2,6 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SIGE — EP Phandira-2</title>
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
@@ -158,6 +159,77 @@ body{display:flex;background:#f1f5f9;}
     border-radius: 5px;
     cursor: pointer;
 }
+
+/* ===========================
+   RESPONSIVO PARA CELULARES
+=========================== */
+
+@media (max-width:768px){
+
+    .sidebar{
+        width:80px;
+        padding:15px 8px;
+    }
+
+    .menu a{
+        width:65px;
+        height:65px;
+        font-size:22px;
+        margin-bottom:22px;
+    }
+
+    .menu a::after{
+        width:75px;
+        font-size:9px;
+        line-height:11px;
+    }
+
+    .back-btn{
+        font-size:24px;
+    }
+
+    .logo{
+        font-size:24px;
+    }
+
+    .topbar{
+        padding:0 15px;
+        height:60px;
+    }
+
+    #smsCount{
+        position:static;
+        font-size:15px;
+        text-align:right;
+    }
+
+    .painel{
+        padding:20px;
+    }
+
+    .painel h2{
+        font-size:28px;
+    }
+
+    .painel p{
+        font-size:18px;
+        margin-top:10px;
+    }
+
+    .footer{
+        text-align:center;
+        font-size:14px;
+        padding:12px;
+    }
+
+    .retry-button{
+        width:100%;
+        font-size:16px;
+        padding:14px;
+    }
+
+}
+
 </style>
 </head>
 
