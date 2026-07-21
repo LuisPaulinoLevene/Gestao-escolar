@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Minha Turma</title>
+
+<style>
+
+*{
+
+    box-sizing:border-box;
+    font-family:"Times New Roman",serif;
+
+}
+
+body{
+
+    margin:0;
+    padding:20px;
+    background:#ececec;
+
+}
+
+.container{
+
+    max-width:900px;
+    margin:auto;
+
+}
+
+.folha{
+
+    background:#fff;
+    padding:35px;
+    border:1px solid #000;
+    min-height:1122px;
+    box-shadow:0 0 10px rgba(0,0,0,.15);
+
+}
+
+
+
+/* =============================
+   CABEÇALHO
+============================= */
+
+.cabecalho{
+
+    text-align:center;
+
+}
+
+.cabecalho img{
+
+    width:90px;
+    height:90px;
+    margin-bottom:10px;
+
+}
+
+.cabecalho h2{
+
+    margin:2px;
+    font-size:24px;
+
+}
+
+.cabecalho h3{
+
+    margin:2px;
+    font-size:18px;
+    font-weight:normal;
+
+}
+
+.cabecalho h4{
+
+    margin:2px;
+    font-size:16px;
+    font-weight:normal;
+
+}
+
+
+
+/* =============================
+   DADOS DA ESCOLA
+============================= */
+
+.dados{
+
+    margin-top:30px;
+
+}
+
+.linha{
+
+    display:flex;
+    margin-bottom:10px;
+
+}
+
+.label{
+
+    width:120px;
+    font-weight:bold;
+
+}
+
+.valor{
+
+    flex:1;
+    border-bottom:1px dotted #000;
+    padding-left:8px;
+
+}
+
+
+
+/* =============================
+   CLASSE
+============================= */
+
+.turma{
+
+    display:flex;
+    justify-content:space-between;
+    margin-top:25px;
+    margin-bottom:25px;
+    font-weight:bold;
+
+}
+
+
+
+/* =============================
+   TITULO
+============================= */
+
+.titulo{
+
+    text-align:center;
+    font-size:20px;
+    margin-bottom:20px;
+    font-weight:bold;
+
+}
+
+
+
+/* =============================
+   TABELA
+============================= */
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+
+}
+
+th{
+
+    background:#efefef;
+
+}
+
+th,
+td{
+
+    border:1px solid #000;
+    padding:7px;
+    font-size:14px;
+
+}
+
+td{
+
+    text-align:center;
+
+}
+
+td.nome{
+
+    text-align:left;
+
+}
+
+
+
+/* =============================
+   ESTATISTICA
+============================= */
+
+.estatistica{
+
+    margin-top:30px;
+
+}
+
+.estatistica table{
+
+    width:300px;
+
+}
+
+.estatistica td{
+
+    text-align:left;
+
+}
+
+
+
+/* =============================
+   ASSINATURA
+============================= */
+
+.assinatura{
+
+    margin-top:80px;
+    text-align:center;
+
+}
+
+.assinatura .linha{
+
+    width:300px;
+    border-top:1px solid #000;
+    margin:auto;
+    display:block;
+
+}
+
+
+
+/* =============================
+   BOTAO
+============================= */
+
+.acoes{
+
+    text-align:center;
+    margin-top:25px;
+
+}
+
+button{
+
+    padding:10px 20px;
+    background:#0d6efd;
+    color:white;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+
+}
+
+
+
+/* =============================
+   IMPRESSAO
+============================= */
+
+@media print{
+
+body{
+
+    background:white;
+
+}
+
+.acoes{
+
+    display:none;
+
+}
+
+.folha{
+
+    box-shadow:none;
+    border:none;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+
+<div class="container">
+
+
+<div class="folha">
+
+
+<div class="cabecalho">
+
+<img
+src="img/emblema.png"
+id="emblema">
+
+<h2>
+
+REPÚBLICA DE MOÇAMBIQUE
+
+</h2>
+
+<h3>
+
+Ministério da Educação e Cultura
+
+</h3>
+
+<h4 id="escolaNome">
+
+</h4>
+
+</div>
+
+
+
+<div class="dados">
+
+<div class="linha">
+
+<div class="label">
+
+Província
+
+</div>
+
+<div
+class="valor"
+id="provincia">
+
+</div>
+
+</div>
+
+
+
+<div class="linha">
+
+<div class="label">
+
+Distrito
+
+</div>
+
+<div
+class="valor"
+id="distrito">
+
+</div>
+
+</div>
+
+
+
+<div class="linha">
+
+<div class="label">
+
+Escola
+
+</div>
+
+<div
+class="valor"
+id="escola">
+
+</div>
+
+</div>
+
+</div>
+
+
+
+
+<div class="turma">
+
+<div>
+
+Classe:
+<span id="classe"></span>
+
+</div>
+
+<div>
+
+Turma:
+<span id="turma"></span>
+
+</div>
+
+<div>
+
+Ano:
+<span id="ano"></span>
+
+</div>
+
+</div>
+
+
+
+
+<div class="titulo">
+
+LISTA NOMINAL DOS ALUNOS
+
+</div>
+
+
+
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Nº</th>
+
+<th>Nome Completo</th>
+
+<th>Sexo</th>
+
+<th>Data Nascimento</th>
+
+<th>Estado</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="lista">
+
+</tbody>
+
+</table>
+
+
+
+
+<div class="estatistica">
+
+<h3>
+
+ESTATÍSTICA
+
+</h3>
+
+<table>
+
+<tr>
+
+<td>
+
+Homens (H)
+
+</td>
+
+<td id="homens">
+
+0
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+Mulheres (M)
+
+</td>
+
+<td id="mulheres">
+
+0
+
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+HM
+
+</td>
+
+<td id="total">
+
+0
+
+</td>
+
+</tr>
+
+</table>
+
+</div>
+
+
+
+
+<div class="assinatura">
+
+<div class="linha"></div>
+
+Professor da Turma
+
+</div>
+
+
+
+
+<div class="acoes">
+
+<button onclick="window.print()">
+
+Imprimir
+
+</button>
+
+</div>
+
+
+
+</div>
+
+</div>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Assistências Mútuas</title>
+
+<style>
+body{
+    font-family: Arial;
+    background:#f1f5f9;
+    margin:0;
+    padding:0;
+}
+
+.container{
+    max-width:1100px;
+    margin:40px auto;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+h1{
+    text-align:center;
+}
+
+form{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    margin-bottom:30px;
+}
+
+select,input,button{
+    padding:8px;
+    border-radius:6px;
+    border:1px solid #cbd5e1;
+}
+
+button{
+    background:#0ea5e9;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:disabled{
+    background:#94a3b8;
+    cursor:not-allowed;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th,td{
+    padding:10px;
+    border-bottom:1px solid #e2e8f0;
+    text-align:center;
+}
+
+.actions button{
+    margin:2px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Assistências Mútuas</h1>
+
+<form id="assistenciaForm">
+    <select id="professorAssistido" required></select>
+    <select id="professorAssistente" required></select>
+    <input type="text" id="disciplina" placeholder="Disciplina" required>
+    <input type="datetime-local" id="dataHora" required>
+    <button type="submit" id="btnSalvar">Salvar</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Assistido</th>
+            <th>Assistente</th>
+            <th>Disciplina</th>
+            <th>Data/Hora</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="tabelaAssistencias"></tbody>
+</table>
+
+</div>
+
+<script>
+
+const API_BASE = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost"
+    ? "http://127.0.0.1:8000"
+    : window.location.origin;
+
+let editandoId = null;
+
+// 🔹 Carregar Professores
+async function carregarProfessores(){
+    const res = await fetch(`${API_BASE}/assistencias/professores`);
+    const professores = await res.json();
+
+    const select1 = document.getElementById("professorAssistido");
+    const select2 = document.getElementById("professorAssistente");
+
+    select1.innerHTML = "<option value=''>Professor Assistido</option>";
+    select2.innerHTML = "<option value=''>Professor Assistente</option>";
+
+    professores.forEach(p=>{
+        select1.innerHTML += `<option value="${p.id}">${p.nome}</option>`;
+        select2.innerHTML += `<option value="${p.id}">${p.nome}</option>`;
+    });
+}
+
+// 🔹 Listar Assistências
+async function listarAssistencias(){
+    const res = await fetch(`${API_BASE}/assistencias/`);
+    const dados = await res.json();
+
+    const tabela = document.getElementById("tabelaAssistencias");
+    tabela.innerHTML = "";
+
+    dados.forEach(a=>{
+        tabela.innerHTML += `
+        <tr>
+            <td>${a.id}</td>
+            <td>${a.professor_assistido_nome}</td>
+            <td>${a.professor_assistente_nome}</td>
+            <td>${a.disciplina}</td>
+            <td>${new Date(a.data_hora).toLocaleString()}</td>
+            <td class="actions">
+                <button onclick="editar(${a.id})">Editar</button>
+                <button onclick="apagar(${a.id})">Apagar</button>
+            </td>
+        </tr>`;
+    });
+}
+
+// 🔹 Criar ou Atualizar
+document.getElementById("assistenciaForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    const btn = document.getElementById("btnSalvar");
+    btn.disabled = true;
+
+    const assistido = document.getElementById("professorAssistido").value;
+    const assistente = document.getElementById("professorAssistente").value;
+    const disciplina = document.getElementById("disciplina").value;
+    const dataHora = document.getElementById("dataHora").value;
+
+    if(assistido === assistente){
+        alert("Professor assistido não pode ser o mesmo que assistente.");
+        btn.disabled = false;
+        return;
+    }
+
+    const payload = {
+        professor_assistido_id: parseInt(assistido),
+        professor_assistente_id: parseInt(assistente),
+        disciplina: disciplina,
+        data_hora: dataHora
+    };
+
+    if(editandoId){
+        await fetch(`${API_BASE}/assistencias/${editandoId}`,{
+            method:"PUT",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
+        });
+        editandoId = null;
+    }else{
+        await fetch(`${API_BASE}/assistencias/`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
+        });
+    }
+
+    document.getElementById("assistenciaForm").reset();
+    await listarAssistencias();
+    btn.disabled = false;
+});
+
+// 🔹 Editar
+async function editar(id){
+    const res = await fetch(`${API_BASE}/assistencias/`);
+    const dados = await res.json();
+    const a = dados.find(x=>x.id===id);
+
+    document.getElementById("disciplina").value = a.disciplina;
+    document.getElementById("dataHora").value = a.data_hora.slice(0,16);
+    editandoId = id;
+}
+
+// 🔹 Apagar
+async function apagar(id){
+    if(!confirm("Deseja apagar?")) return;
+
+    const botoes = document.querySelectorAll("button");
+    botoes.forEach(b=>b.disabled=true);
+
+    await fetch(`${API_BASE}/assistencias/${id}`,{
+        method:"DELETE"
+    });
+
+    await listarAssistencias();
+
+    botoes.forEach(b=>b.disabled=false);
+}
+
+// 🔹 Inicializar
+carregarProfessores();
+listarAssistencias();
+
+</script>
+
+</body>
+</html>
