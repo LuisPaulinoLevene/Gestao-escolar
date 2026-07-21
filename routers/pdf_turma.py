@@ -1,5 +1,5 @@
 from pathlib import Path
-from fastapi.responses import HTMLResponse
+from fastapi.responses import FileResponse
 import os
 import asyncio
 from docx.shared import Inches
@@ -233,11 +233,11 @@ async def gerar_pdf_turma(
     with open(caminho, "wb") as f:
         f.write(pdf)
 
-    return {
-        "status": "ok",
-        "arquivo": nome_pdf,
-        "url": f"/static/downloads/{nome_pdf}"
-    }
+    return FileResponse(
+        path=caminho,
+        filename=nome_pdf,
+        media_type="application/pdf"
+    )
 
 @router.get("/word/turma/{turma_id}")
 async def gerar_word_turma(
@@ -447,8 +447,8 @@ async def gerar_word_turma(
     with open(caminho, "wb") as f:
         f.write(arquivo.read())
 
-    return {
-        "status": "ok",
-        "arquivo": nome_word,
-        "url": f"/static/downloads/{nome_word}"
-    }
+    return FileResponse(
+        path=caminho,
+        filename=nome_word,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
