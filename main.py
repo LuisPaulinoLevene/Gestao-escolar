@@ -8,7 +8,7 @@ if sys.platform == "win32":
         asyncio.WindowsProactorEventLoopPolicy()
     )
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 # Banco de dados
@@ -108,7 +108,17 @@ async def startup():
 
     print("✅ Sistema iniciado")
 
+# ========================
+# TWA ANDROID ASSETLINKS
+# ========================
 
+@app.get("/.well-known/assetlinks.json", include_in_schema=False)
+async def assetlinks():
+    return FileResponse(
+        "static/.well-known/assetlinks.json",
+        media_type="application/json"
+    )
+    
 @app.get("/system/database")
 async def database_status():
     return await status_bancos()
@@ -236,8 +246,6 @@ app.include_router(matriculas.router)
 app.include_router(alunos_por_turma.router)
 app.include_router(escolas.router)
 app.include_router(acessos.router)
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # ==========================
 # FIM
