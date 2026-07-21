@@ -949,43 +949,15 @@ function mostrarMensagem(texto){
 // BAIXAR PDF
 // ==========================
 
-async function baixarPDF(){
+function baixarPDF(){
 
-    try{
-
-        const resposta = await fetch("/pdf/turma/{{ turma.id }}");
-
-        const dados = await resposta.json();
-
-        mostrarMensagem("✅ Download concluído.");
-
-    }
-
-    catch(e){
-
-        mostrarMensagem("❌ Erro ao gerar PDF.");
-
-    }
+    window.location.href = "/pdf/turma/{{ turma.id }}";
 
 }
 
-async function baixarWord(){
+function baixarWord(){
 
-    try{
-
-        const resposta = await fetch("/pdf/word/turma/{{ turma.id }}");
-
-        const dados = await resposta.json();
-
-        mostrarMensagem("✅ Download concluído.");
-
-    }
-
-    catch(e){
-
-        mostrarMensagem("❌ Erro ao gerar Word.");
-
-    }
+    window.location.href = "/pdf/word/turma/{{ turma.id }}";
 
 }
 </script>
