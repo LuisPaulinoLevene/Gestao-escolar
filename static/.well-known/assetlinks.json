@@ -1,9 +1,8 @@
-
 [{
       "relation": ["delegate_permission/common.handle_all_urls"],
       "target": {
         "namespace": "android_app",
         "package_name": "com.onrender.ep_phandira_2.twa",
-        "sha256_cert_fingerprints": ["9A:52:20:FE:0A:69:6F:DA:A3:92:4F:F8:D7:88:F5:A7:11:B1:7C:92:94:82:70:39:B4:C4:D9:D7:47:2C:2C:74"]
+        "sha256_cert_fingerprints": ["3E:2C:39:D0:25:B1:6E:5E:2F:36:A9:E1:10:29:D8:EA:EA:45:CC:22:F2:7B:55:E2:40:C5:44:BB:EE:21:61:12"]
       }
     }]
